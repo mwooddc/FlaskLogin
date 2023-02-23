@@ -1,0 +1,5 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} 
+{% block content%} 
+<!-- Here we use Jinja to get access to the current logged in users object -->
+logged in as {{ current_user.username }}
+{% endblock %}
