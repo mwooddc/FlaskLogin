@@ -15,7 +15,7 @@ views = Blueprint("views", __name__)
 @login_required
 def home():
     #here the user variable stores the current user which if it exists i.e.
-    # youare logged in, is an object containing the users record
+    # you are logged in, is an object containing the users record
     # we can then inside home.html use jinja to access the users fields
     #e.g. id, username, email {{ current_user.username }}
     return render_template("home.html", user=current_user)
