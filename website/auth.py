@@ -47,6 +47,8 @@ def sign_up():
         username = request.form.get("username")
         password1 = request.form.get("password1")
         password2 = request.form.get("password2")
+        #are these requests getting the id, name or value from the signup form?
+        coach_or_player = request.form.get("coach_or_player")
 
         email_exists = User.query.filter_by(email=email).first()
         username_exists = User.query.filter_by(username=username).first()
@@ -65,8 +67,7 @@ def sign_up():
             flash("Email is invalid.", category='error')
         else:
             new_user = User(email=email, username=username, password=generate_password_hash(
-                password1, method='scrypt'))
-            # new_user = User(email=email, username=username, password=password1)
+                password1, method='scrypt'), coach_or_player=coach_or_player)
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user, remember=True)

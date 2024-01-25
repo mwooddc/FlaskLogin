@@ -18,5 +18,8 @@ To then run your applicaiton type:
 
 flask --app app run (where app is the name of your python file in the route directory)
 
+If you don't want to have to stop the server and restart it each time a change is made (Ctrl+C). Then start the application with this command instead, to put it in debug mode: flask --app example_app.py --debug run
+
+
 # To NOTE
 In the auth.py file on line 68 the sha256 method is passed as a parameter but in the latest version of the werkzeug module (which is imported) this has to be changed to scrypt i.e. method='scrypt'
