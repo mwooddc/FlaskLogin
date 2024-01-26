@@ -20,57 +20,59 @@ auth = Blueprint("auth", __name__)
 @auth.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get("email")
-        password = request.form.get("password")
+        Email = request.form.get("Email")
+        Password = request.form.get("Password")
 
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(Email=Email).first()
         if user:
-            if check_password_hash(user.password, password):
+            if check_password_hash(user.Password, Password):
                 flash("Logged in!", category='success')
-                # Logs in the user whos email and hashed password match
-                #(see variable above user =   on line 26)
+                # Logs in the User whos Email and hashed Password match
+                #(see variable above User =   on line 26)
                 login_user(user, remember=True)
-                #redirect to views.home where the user is passed as an object
+                #redirect to views.home where the User is passed as an object
                 return redirect(url_for('views.home'))
             else:
                 flash('Password is incorrect.', category='error')
         else:
             flash('Email does not exist.', category='error')
 
-    return render_template("login.html", user=current_user)
+    return render_template("login.html", user = current_user)
 
 
 @auth.route("/sign-up", methods=['GET', 'POST'])
 def sign_up():
     if request.method == 'POST':
-        email = request.form.get("email")
-        username = request.form.get("username")
-        password1 = request.form.get("password1")
-        password2 = request.form.get("password2")
+        Email = request.form.get("Email")
+        Username = request.form.get("Username")
+        Password1 = request.form.get("Password1")
+        Password2 = request.form.get("Password2")
+        Forename = request.form.get("Forename")
+        Surname = request.form.get("Surname")
         #are these requests getting the id, name or value from the signup form?
-        coach_or_player = request.form.get("coach_or_player")
+        Role = request.form.get("Role")
 
-        email_exists = User.query.filter_by(email=email).first()
-        username_exists = User.query.filter_by(username=username).first()
+        Email_exists = User.query.filter_by(Email=Email).first()
+        Username_exists = User.query.filter_by(Username=Username).first()
 
-        if email_exists:
+        if Email_exists:
             flash('Email is already in use.', category='error')
-        elif username_exists:
+        elif Username_exists:
             flash('Username is already in use.', category='error')
-        elif password1 != password2:
+        elif Password1 != Password2:
             flash('Password don\'t match!', category='error')
-        elif len(username) < 2:
+        elif len(Username) < 2:
             flash('Username is too short.', category='error')
-        elif len(password1) < 6:
+        elif len(Password1) < 6:
             flash('Password is too short.', category='error')
-        elif len(email) < 4:
+        elif len(Email) < 4:
             flash("Email is invalid.", category='error')
         else:
-            new_user = User(email=email, username=username, password=generate_password_hash(
-                password1, method='scrypt'), coach_or_player=coach_or_player)
-            db.session.add(new_user)
+            new_User = User(Email=Email, Username=Username, Password=generate_password_hash(
+                Password1, method='scrypt'), Forename=Forename, Surname=Surname, Role=Role)
+            db.session.add(new_User)
             db.session.commit()
-            login_user(new_user, remember=True)
+            login_user(new_User, remember=True)
             flash('User created!')
             return redirect(url_for('views.home'))
 

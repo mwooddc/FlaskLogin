@@ -1,7 +1,12 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} 
 {% block content%} 
 <!-- Here we use Jinja to get access to the current logged in users object -->
-logged in as {{ current_user.username }} </br>
-You are a {{ current_user.coach_or_player }} </br>
-Your email is: {{ current_user.email }}
+<p>
+</br>
+You are logged in as: {{ current_user.Username }} </br>
+Your email is: {{ current_user.Email }} </br>
+Your Forename is: {{ current_user.Forename }} </br>
+Your Surname is: {{ current_user.Surname }} </br>
+You are a: {{ current_user.Role }} </br>
+</p>
 {% endblock %}
