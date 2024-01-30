@@ -1,5 +1,19 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} 
 {% block content%} 
+
+{% if current_user.Role == 'Coach' %}
+  <!-- Coach-specific menu options -->
+  <a href="/coach_dashboard">Coach Dashboard</a>
+  <!-- More options -->
+  COOOOACH
+{% elif current_user.Role == 'Player' %}
+PLAYEEER
+  <!-- Player-specific menu options -->
+  <a href="/player_stats">Player Statistics</a>
+  <!-- More options -->
+{% endif %}
+
+
 <!-- Here we use Jinja to get access to the current logged in users object -->
 <p>
 </br>
@@ -9,4 +23,6 @@ Your Forename is: {{ current_user.Forename }} </br>
 Your Surname is: {{ current_user.Surname }} </br>
 You are a: {{ current_user.Role }} </br>
 </p>
+Test
+
 {% endblock %}

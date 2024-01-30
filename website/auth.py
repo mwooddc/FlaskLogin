@@ -2,7 +2,7 @@
 #e.g. if I have a route called @qpp.route def xxx(): and I want to go to that route
 #type  url_for('xxx') REMEMBER if using Blueprints nameoffile.function e.g. 
 #url_for('views.xxx') You can use in templates too with jinja e.g. {{ url_for('views.xxx)}}
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 from . import db
 from .models import User
 #Great video to explain flask_login library: https://www.youtube.com/watch?v=2dEM-s3mRLE
@@ -30,6 +30,8 @@ def login():
                 # Logs in the User whos Email and hashed Password match
                 #(see variable above User =   on line 26)
                 login_user(user, remember=True)
+                # Store the user's role in the session
+                session['role'] = user.Role
                 #redirect to views.home where the User is passed as an object
                 return redirect(url_for('views.home'))
             else:
