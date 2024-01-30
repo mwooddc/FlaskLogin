@@ -9,6 +9,7 @@ content %}
       id="Email"
       name="Email"
       class="form-control"
+      value="{{ email }}" required
       placeholder="Enter Email"
     />
     <label for="Username">Username</label>
@@ -17,6 +18,7 @@ content %}
       id="Username"
       name="Username"
       class="form-control"
+      value="{{ username }}" required
       placeholder="Enter Username"
     />
     <label for="Password1">Password</label>
@@ -41,6 +43,7 @@ content %}
       id="Forename"
       name="Forename"
       class="form-control"
+      value="{{ forename }}" required
       placeholder="Enter Forename"
     />
     <label for="Surname">Surname</label>
@@ -49,12 +52,13 @@ content %}
       id="Surname"
       name="Surname"
       class="form-control"
+      value="{{ surname }}" required
       placeholder="Enter Surname"
     />
     <label for="Role">Coach or Player</label><br />
     <input type="radio" id="Coach" name="Role" value="Coach">
     <label for="Coach">Coach</label><br />
-    <input type="radio" id="Player" name="Role" value="Player">
+    <input type="radio" id="Player" name="Role" value="Player" checked>
     <label for="Player">Player</label>
     <br />
     <div align="center">

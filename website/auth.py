@@ -5,6 +5,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 from . import db
 from .models import User
+#wraps is required but the reasons why are complex (search if required)
+from functools import wraps
 #Great video to explain flask_login library: https://www.youtube.com/watch?v=2dEM-s3mRLE
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -44,6 +46,12 @@ def login():
 
 @auth.route("/sign-up", methods=['GET', 'POST'])
 def sign_up():
+    Email = ""
+    Username = ""
+    Forename = ""
+    Surname = ""
+    Role = None
+
     if request.method == 'POST':
         Email = request.form.get("Email")
         Username = request.form.get("Username")
@@ -78,7 +86,9 @@ def sign_up():
             flash('User created!')
             return redirect(url_for('views.home'))
 
-    return render_template("signup.html", user=current_user)
+    return render_template("signup.html", user=current_user, 
+                           email=Email, username=Username, 
+                           forename=Forename, surname=Surname, role=Role)
 
 
 @auth.route("/logout")
@@ -86,3 +96,18 @@ def sign_up():
 def logout():
     logout_user()
     return redirect(url_for("views.home"))
+
+
+#This is me building my own decorator so that above each route for a
+#Player or a Coach you can use @role_required('Player') or @role_required('Coach')
+#and only those routes will be accessible to someone in that role
+def role_required(role):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated or current_user.Role != role:
+                flash('You do not have the necessary permissions to access this page.', 'error')
+                return redirect(url_for('views.home'))  # Redirect to a different page
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator

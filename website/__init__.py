@@ -22,10 +22,14 @@ def create_app():
     #and registered
     from .views import views
     from .auth import auth
+    from .player import player
+    from .coach import coach
     #You can change the prefix if needed e.g. url_prefix="/moon/" would mean that all routes
     #from that blueprint can only be accessed first by going to the prefix URL
     app.register_blueprint(views, url_prefix="/")
     app.register_blueprint(auth, url_prefix="/")
+    app.register_blueprint(player, url_prefix="/")
+    app.register_blueprint(coach, url_prefix="/")
 
     from .models import User
 
@@ -56,3 +60,7 @@ def create_app():
 #     if not path.exists("website/" + DB_NAME):
 #         db.create_all()
 #         print("Created database!")
+
+
+
+
