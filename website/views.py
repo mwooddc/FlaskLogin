@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, session
 from flask_login import login_required, current_user
 
 #A Blueprint simply allows you to create seperate files from the standard app.py
@@ -14,6 +14,9 @@ views = Blueprint("views", __name__)
 @views.route("/home")
 @login_required
 def home():
+    # Check the user's role and pass it to the template
+    role = session.get('role', 'Player')  # Default to 'Player' if not set
+
     #here the user variable stores the current user which if it exists i.e.
     # you are logged in, is an object containing the users record
     # we can then inside home.html use jinja to access the users fields
