@@ -21,4 +21,7 @@ def home():
     # you are logged in, is an object containing the users record
     # we can then inside home.html use jinja to access the users fields
     #e.g. id, username, email {{ current_user.username }}
-    return render_template("home.html", user=current_user)
+    if current_user.is_authenticated and current_user.Role == 'Player':
+        return render_template("playerdash.html", user=current_user)
+    elif current_user.is_authenticated and current_user.Role == 'Coach':
+        return render_template("coachdash.html", user=current_user)

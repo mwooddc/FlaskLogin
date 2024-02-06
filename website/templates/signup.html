@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block title %}Sign Up{% endblock %} {% block
 content %}
-<form method="POST">
+<!-- <form method="POST">
   <h3 align="center">Sign Up</h3>
   <div class="form-group">
     <label for="Email">Email Address</label>
@@ -65,5 +65,72 @@ content %}
       <button class="btn btn-primary" type="submit">Sign Up</button>
     </div>
   </div>
-</form>
+</form> -->
+
+
+
+
+<div class="wrapper">
+  <form method="POST">
+
+      <section>
+          <div class="inner">
+            <div class="form-row form-group">
+              <div class="form-holder">
+                <input type="text" id="Forename" name="Forename" class="form-control" value="{{ forename }}" required placeholder="Forename">
+              </div>
+              <div class="form-holder">
+                <input type="text" id="Surname" name="Surname" class="form-control" value="{{ surname }}" required placeholder="Surname">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-holder">
+                <input type="text" id="Username" name="Username" class="form-control" value="{{ username }}" required placeholder="Username">
+                <i class="zmdi zmdi-account-box-o small"></i>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-holder">
+                <input type="text" id="Email" name="Email" class="form-control" value="{{ email }}" required placeholder="Email">
+                <i class="zmdi zmdi-email small"></i>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-holder">
+                <input type="password" id="Password1" name="Password1" class="form-control" placeholder="Password">
+                <i class="zmdi zmdi-lock-open small"></i>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-holder">
+                <input type="password" id="Password2" name="Password2" class="form-control" placeholder="Re-Enter Password">
+                <i class="zmdi zmdi-lock-open small"></i>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-holder"><h5>
+                <label for="Role">Coach or Player:</label></h5>
+                <input type="radio" id="Coach" name="Role" value="Coach">
+                <label for="Coach">Coach</label><br />
+                <input type="radio" id="Player" name="Role" value="Player" checked>
+                <label for="Player">Player</label>
+              </div>
+            </div>
+            <sl-button variant="neutral" type="submit">Sign Up</sl-button>
+          </div>
+      </section>
+  </form>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
 {% endblock %}
