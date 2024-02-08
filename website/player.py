@@ -2,6 +2,9 @@ from flask import Blueprint, render_template, session
 from flask_login import login_required, current_user
 from .auth import role_required
 
+from .models import db, UserRatings, RatingCategory  # Adjust the import as per your project structure
+
+
 #A Blueprint simply allows you to create seperate files from the standard app.py
 #file to hold routes (without blueprint all routes would be in one file)
 #see this video for explanation: https://www.youtube.com/watch?v=pjVhrIJFUEs
@@ -24,3 +27,13 @@ def mates():
     # we can then inside home.html use jinja to access the users fields
     #e.g. id, username, email {{ current_user.username }}
     return render_template("player.html", user=current_user)
+
+
+@player.route('/playerdashboard')
+@login_required
+@role_required('Player')
+def playerdashboard():
+    role = session.get('role', 'Player')  # Default to 'Player' if not set
+    # Query to fetch the ratings and their categories for the current user
+    ratings = db.session.query(UserRatings, RatingCategory).join(RatingCategory).filter(UserRatings.id == current_user.id).all()
+    return render_template('playerdash.html', ratings=ratings, user=current_user)

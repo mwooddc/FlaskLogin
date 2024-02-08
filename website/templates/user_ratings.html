@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} 
+{% block content%} 
+
+<h2>User Ratings</h2>
+    <table border="1">
+        <tr>
+            <th>Rating Category</th>
+            <th>Value</th>
+        </tr>
+        {% for rating, category in ratings %}
+            <tr>
+                <td>{{ category.CategoryDescription }}</td>
+                <td>{{ rating.Value }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}

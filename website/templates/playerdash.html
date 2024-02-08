@@ -1,36 +1,70 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} 
 {% block content%} 
 
-<div class="wrapper">
+<!-- <div class="wrapper">
   PLAYER DASHHHHHHHHHHHHH
 
 {% if current_user.Role == 'Coach' %}
-  <!-- Coach-specific menu options -->
   <a href="/coach_dashboard">Coach Dashboard</a>
-  <!-- More options -->
   COOOOACH
 
   
 {% elif current_user.Role == 'Player' %}
 PLAYEEER
-  <!-- Player-specific menu options -->
   <a href="/player_stats">Player Statistics</a>
-  <!-- More options -->
-{% endif %}
+{% endif %} -->
 
 
 <!-- Here we use Jinja to get access to the current logged in users object -->
-<p>
-</br>
-You are logged in as: {{ current_user.Username }} </br>
-Your email is: {{ current_user.Email }} </br>
-Your Forename is: {{ current_user.Forename }} </br>
-Your Surname is: {{ current_user.Surname }} </br>
-You are a: {{ current_user.Role }} </br>
-</p>
-Test
 
+<body style="background-image: none;">
 
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Profile Details</h5>
+
+          <h6>You are logged in as:</h6> {{ current_user.Username }} </br>
+          <h6>Your Email Address is:</h6> {{ current_user.Email }} </br>
+          <h6>Your Forename is:</h6> {{ current_user.Forename }} </br>
+          <h6>Your Surname is:</h6> {{ current_user.Surname }} </br>
+          <h6>You Role is:</h6> {{ current_user.Role }} </br>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Player ratings for: {{ current_user.Forename }}</h5>
+            <table border="1">
+                <tr>
+                    <th>Rating Category</th>
+                    <th>Value</th>
+                </tr>
+                {% for rating, category in ratings %}
+                    <tr>
+                        <td>{{ category.CategoryDescription }}</td>
+                        <td>{{ rating.Value }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Panel 3</h5>
+          <p class="card-text">Content for Panel 3 goes here.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+
+
 
 {% endblock %}

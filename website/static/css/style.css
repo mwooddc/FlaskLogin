@@ -13,6 +13,14 @@ body {
   background: url("../images/tennis1.png") center bottom;
   background-size: cover; }
 
+  /* Your custom CSS */
+.badge-custom {
+  background-color: red;
+  border-radius: 50%; /* Make it a circle */
+  padding: 5px 8px; /* Adjust padding for better appearance */
+  color: white;
+}
+
 :focus {
   outline: none; }
 
