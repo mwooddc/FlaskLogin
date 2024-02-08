@@ -30,10 +30,18 @@ class User(db.Model, UserMixin):
     Role = db.Column(db.String(50), nullable=False)  # 'Player' or 'Coach'
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     # Relationships
-    user_ratings = db.relationship('UserRatings', backref='user', lazy='dynamic')
+    
     session_attendance = db.relationship('SessionAttendance', backref='user', lazy='dynamic')
     match_attendance = db.relationship('MatchAttendance', backref='user', lazy='dynamic')
     team_players = db.relationship('TeamPlayers', backref='user', lazy='dynamic')
+    ratings_given = db.relationship('UserRatings', 
+                                 foreign_keys='UserRatings.Raterid',
+                                 backref='rater', 
+                                 lazy='dynamic')
+    ratings_received = db.relationship('UserRatings', 
+                                    foreign_keys='UserRatings.Rateeid',
+                                    backref='ratee', 
+                                    lazy='dynamic')
 
 class Team(db.Model, UserMixin):
     __tablename__ = 'teams'
@@ -62,9 +70,12 @@ class RatingCategory(db.Model, UserMixin):
 
 class UserRatings(db.Model, UserMixin):
     __tablename__ = 'user_ratings'
-    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    RatingCategory = db.Column(db.Integer, db.ForeignKey('rating_category.CategoryCode'), primary_key=True)
+    UserRatingsID = db.Column(db.Integer, primary_key=True)
+    Raterid = db.Column(db.Integer, db.ForeignKey('users.id'))
+    Rateeid = db.Column(db.Integer, db.ForeignKey('users.id'))
+    RatingCategory = db.Column(db.Integer, db.ForeignKey('rating_category.CategoryCode'))
     Value = db.Column(db.Integer)
+    date_created = db.Column(db.DateTime(timezone=True), default=func.now())
 
 class PracticeSessions(db.Model, UserMixin):
     __tablename__ = 'practice_sessions'
