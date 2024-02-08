@@ -35,5 +35,10 @@ def mates():
 def playerdashboard():
     role = session.get('role', 'Player')  # Default to 'Player' if not set
     # Query to fetch the ratings and their categories for the current user
-    ratings = db.session.query(UserRatings, RatingCategory).join(RatingCategory).filter(UserRatings.id == current_user.id).all()
-    return render_template('playerdash.html', ratings=ratings, user=current_user)
+    ratings_query = db.session.query(UserRatings, RatingCategory).join(RatingCategory).filter(UserRatings.id == current_user.id).all()
+    # Process the query results
+    categories = [category.CategoryDescription for _, category in ratings_query]
+    ratings = [rating.Value for rating, _ in ratings_query]
+    return render_template('playerdash.html', ratings_query=ratings_query, ratings=ratings, categories=categories,user=current_user)
+
+

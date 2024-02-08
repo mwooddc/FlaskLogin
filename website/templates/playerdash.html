@@ -38,12 +38,18 @@ PLAYEEER
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Player ratings for: {{ current_user.Forename }}</h5>
-            <table border="1">
+          <!-- {{categories}}
+          {{ratings}} -->
+          <div>
+            <canvas id="userRatingsChart"></canvas>
+          </div>
+          
+            <table id="example" class="table table-striped" style="width:100%">
                 <tr>
-                    <th>Rating Category</th>
+                    <th>Category</th>
                     <th>Value</th>
                 </tr>
-                {% for rating, category in ratings %}
+                {% for rating, category in ratings_query %}
                     <tr>
                         <td>{{ category.CategoryDescription }}</td>
                         <td>{{ rating.Value }}</td>
@@ -63,6 +69,43 @@ PLAYEEER
     </div>
   </div>
 </div>
+
+
+
+
+<script>
+  var ctx = document.getElementById('userRatingsChart').getContext('2d');
+  var myChart = new Chart(ctx, {
+      type: 'line', // Change to 'line', 'pie', etc., as needed
+      data: {
+          labels: {{ categories | tojson | safe }},
+          datasets: [{
+              label: 'User Ratings',
+              data: {{ ratings | tojson | safe }},
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.2)',
+                  'rgba(54, 162, 235, 0.2)',
+                  'rgba(255, 206, 86, 0.2)',
+                  // Add more colors as needed
+              ],
+              borderColor: [
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  // Add more colors as needed
+              ],
+              borderWidth: 1
+          }]
+      },
+      options: {
+          scales: {
+              y: {
+                  beginAtZero: true
+              }
+          }
+      }
+  });
+</script>
 
 
 
