@@ -91,6 +91,26 @@ def playerdashboard():
             # Add more customization for each line here (e.g., backgroundColor, borderColor)
         })
 
+    
+    # Step 1: Find the maximum number of values among all categories
+    max_values = max(len(category['Value']) for category in datasets)
+
+    # Step 2: Iterate through each category's 'Value' list
+    for category in datasets:
+        num_values = len(category['Value'])
+        if num_values < max_values:
+            # Step 3: Fill in the remaining values
+            if num_values == 0:
+                # If the list is empty, fill it with zeros
+                category['Value'] = [0] * max_values
+            else:
+                # Repeat the last value to fill in the remaining values
+                last_value = category['Value'][-1]
+                category['Value'].extend([last_value] * (max_values - num_values))
+
+
+
+
     return render_template('playerdash.html', ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, categories=categories, user=current_user)
 
 

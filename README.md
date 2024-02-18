@@ -23,3 +23,5 @@ If you don't want to have to stop the server and restart it each time a change i
 
 # To NOTE
 In the auth.py file on line 68 the sha256 method is passed as a parameter but in the latest version of the werkzeug module (which is imported) this has to be changed to scrypt i.e. method='scrypt'
+
+Have used https://datatables.net/ for table layout css

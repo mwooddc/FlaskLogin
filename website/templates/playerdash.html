@@ -1,22 +1,6 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} 
 {% block content%} 
 
-<!-- <div class="wrapper">
-  PLAYER DASHHHHHHHHHHHHH
-
-{% if current_user.Role == 'Coach' %}
-  <a href="/coach_dashboard">Coach Dashboard</a>
-  COOOOACH
-
-  
-{% elif current_user.Role == 'Player' %}
-PLAYEEER
-  <a href="/player_stats">Player Statistics</a>
-{% endif %} -->
-
-
-<!-- Here we use Jinja to get access to the current logged in users object -->
-
 <body style="background-image: none;">
 
 <div class="container mt-4">
@@ -37,7 +21,8 @@ PLAYEEER
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Player ratings for: {{ current_user.Forename }}</h5>
+          <!-- <h5 class="card-title">Player ratings for: {{ current_user.Forename }}</h5> -->
+          <h5 class="card-title">Coach Ratings Over Time</h5>
           <!-- Check these for testing purposes
           {{datasets}}<br/><br/>
           {{categories}}<br/><br/>
@@ -99,8 +84,9 @@ PLAYEEER
       datasets.push({
           label: item.Category,
           data: item.Value,
-          borderColor: '#' + (Math.random() * 0xFFFFFF << 0).toString(16), // Random border color
-          fill: false
+          // generate random colours for the lines each time
+          borderColor: false,
+          fill: '#' + (Math.random() * 0xFFFFFF << 0).toString(16), // Random border color
       });
   });
 
