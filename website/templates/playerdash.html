@@ -38,32 +38,36 @@ PLAYEEER
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Player ratings for: {{ current_user.Forename }}</h5>
-          {{categories}}
-          {{ratings}}
-          <div>
-            <canvas id="userRatingsChart"></canvas>
+          <!-- Check these for testing purposes
+          {{datasets}}<br/><br/>
+          {{categories}}<br/><br/>
+          {{ratings_query}} -->
+
+          <div id="chart-container">
+            <canvas id="userRatingsChart" ></canvas>
           </div>
-          
-            <table id="example" class="table table-striped" style="width:100%">
-                <tr>
-                    <th>Category</th>
-                    <th>Value</th>
-                </tr>
-                {% for rating, category in ratings_query %}
-                    <tr>
-                        <td>{{ category.CategoryDescription }}</td>
-                        <td>{{ rating.Value }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
+
+
         </div>
       </div>
     </div>
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Panel 3</h5>
-          <p class="card-text">Content for Panel 3 goes here.</p>
+          <h5 class="card-title">Latest Coach Ratings</h5>
+          <table id="example" class="table table-striped" style="width:100%">
+              <tr>
+                  <th>Category</th>
+                  <th>Value ( / 10)</th>
+              </tr>
+              {% for rating, date, category in filtered_data %}
+                  <tr>
+                      <!-- need to figure out here how to present the LATEST/MOST RECENT scores per category -->
+                      <td>{{ category }}</td>
+                      <td>{{ rating }}</td>
+                  </tr>
+              {% endfor %}
+          </table>
         </div>
       </div>
     </div>
@@ -72,8 +76,84 @@ PLAYEEER
 
 
 
-
 <script>
+  // Extract data from Python variable to JavaScript
+  const dataStructure = {{ datasets | tojson | safe }};
+  console.log(dataStructure); // Log the value to the console for debugging
+
+  // Extract categories, values, and dates dynamically
+  const categories = [];
+  const datasets = [];
+  let allDates = []; // Array to hold all dates for all categories
+  
+
+  dataStructure.forEach(item => {
+      categories.push(item.Category);
+
+      // Extract dates for this category
+      const dates = item.Date;
+      allDates = allDates.concat(dates); // Add dates to allDates array
+      console.log("All dates:",allDates); // Log the value to the console for debugging
+
+      // Create dataset for this category
+      datasets.push({
+          label: item.Category,
+          data: item.Value,
+          borderColor: '#' + (Math.random() * 0xFFFFFF << 0).toString(16), // Random border color
+          fill: false
+      });
+  });
+
+  // Deduplicate dates and sort them
+  const uniqueDates = Array.from(new Set(allDates)).sort();
+  console.log("Uni dates:",uniqueDates); // Log the value to the console for debugging
+  console.log("DATASETS:",datasets); // Log the value to the console for debugging
+
+  // Create Chart.js line graph
+  const ctx = document.getElementById('userRatingsChart').getContext('2d');
+  const lineChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: uniqueDates,
+          datasets: datasets
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          aspectRatio: 0.9, // Set a custom aspect ratio (e.g., 2:1)
+          scales: {
+              x: {
+                  display: true,
+                  title: {
+                      display: true,
+                      text: 'Date'
+                  }
+              },
+              y: {
+                  display: true,
+                  title: {
+                      display: true,
+                      text: 'Value'
+                  },
+                  suggestedMin: 0, // Adjust min value as needed
+                  suggestedMax: 10 // Adjust max value as needed
+              }
+          }
+      }
+  });
+</script>
+
+
+
+
+
+
+
+
+{% endblock %}
+
+
+<!-- <script>
   var ctx = document.getElementById('userRatingsChart').getContext('2d');
   var myChart = new Chart(ctx, {
       type: 'line', // Change to 'line', 'pie', etc., as needed
@@ -105,12 +185,4 @@ PLAYEEER
           }
       }
   });
-</script>
-
-
-
-
-
-
-
-{% endblock %}
+</script> -->

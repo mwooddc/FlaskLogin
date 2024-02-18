@@ -6,6 +6,21 @@
   -moz-box-sizing: border-box;
   box-sizing: border-box; }
 
+
+  #chart-container {
+    position: relative; /* Ensure that the child elements position themselves relative to this container */
+    width: 100%; /* Set the width to 100% of the parent container */
+    height: auto; /* Allow the height to adjust automatically based on content */
+    max-width: 100%; /* Ensure that the container does not exceed the width of its parent */
+    overflow: hidden; /* Hide any content that overflows the container */
+}
+
+#chart-container canvas {
+    display: block; /* Ensure that the canvas is treated as a block-level element */
+    width: 100%; /* Set the width to 100% to fill the container */
+    height: auto; /* Allow the height to adjust automatically based on content */
+}
+
 body {
   font-family: "Poppins-Regular";
   font-size: 13px;

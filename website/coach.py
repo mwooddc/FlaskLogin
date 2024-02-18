@@ -29,27 +29,6 @@ def mates():
     return render_template("coach.html", user=current_user)
 
 
-
-# @coach.route('/submit-rating', methods=['GET', 'POST'])
-# @login_required
-# @role_required('Coach')
-# def submit_rating():
-#     form = UserRatingForm()
-#     if form.validate_on_submit():
-#         # Create a new UserRatings object and assign form data to its attributes
-#         new_rating = UserRatings(
-#             Raterid=form.rater_id.data,
-#             Rateeid=form.ratee_id.data,
-#             RatingCategory=form.rating_category.data,
-#             Value=form.value.data
-#         )
-#         db.session.add(new_rating)
-#         db.session.commit()
-#         return redirect(url_for('coach.success'))
-#     print("Rendering coach.html template...")
-#     return render_template('coach.html', form=form, user=current_user)
-
-
 @coach.route('/submit-rating', methods=['GET', 'POST'])
 @login_required
 @role_required('Coach')
@@ -71,7 +50,6 @@ def submit_rating():
         return redirect(url_for('coach.success'))
 
     return render_template('coach.html', form=form, user=current_user)
-
 
 
 @coach.route('/success')

@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, session
 from flask_login import login_required, current_user
 from .auth import role_required
+from collections import defaultdict
 # from collections import defaultdict
 # from sqlalchemy.sql import func
+from datetime import datetime
 
 from .models import db, UserRatings, RatingCategory  # Adjust the import as per your project structure
 
@@ -31,17 +33,65 @@ def mates():
     return render_template("player.html", user=current_user)
 
 
+# @player.route('/playerdashboard')
+# @login_required
+# @role_required('Player')
+# def playerdashboard():
+#     role = session.get('role', 'Player')  # Default to 'Player' if not set
+#     # Query to fetch the ratings and their categories for the current user
+#     ratings_query = db.session.query(UserRatings, RatingCategory).join(RatingCategory).filter(UserRatings.Rateeid == current_user.id).all()
+#     # Process the query results
+#     categories = [category.CategoryDescription for _, category in ratings_query]
+#     ratings = [rating.Value for rating, _ in ratings_query]
+#     return render_template('playerdash.html', ratings_query=ratings_query, ratings=ratings, categories=categories,user=current_user)
+
+
+
+
 @player.route('/playerdashboard')
 @login_required
 @role_required('Player')
 def playerdashboard():
     role = session.get('role', 'Player')  # Default to 'Player' if not set
-    # Query to fetch the ratings and their categories for the current user
-    ratings_query = db.session.query(UserRatings, RatingCategory).join(RatingCategory).filter(UserRatings.Rateeid == current_user.id).all()
-    # Process the query results
-    categories = [category.CategoryDescription for _, category in ratings_query]
-    ratings = [rating.Value for rating, _ in ratings_query]
-    return render_template('playerdash.html', ratings_query=ratings_query, ratings=ratings, categories=categories,user=current_user)
+
+    # Query to fetch the ratings, their categories, and dates for the current user
+    ratings_query = db.session.query(UserRatings.Value, UserRatings.date_created, RatingCategory.CategoryDescription)\
+        .join(RatingCategory)\
+        .filter(UserRatings.Rateeid == current_user.id)\
+        .order_by(UserRatings.date_created.asc()).all()
+    
+    #Iterate over the ratings query and remove any repeating categories, keep only the latest
+    #This is so we can plot in a table the LATEST ratings for a player
+    # Create a dictionary to store the latest datetime for each unique value
+    latest_datetime = {}
+
+    # Iterate over the data and update the latest datetime for each unique value
+    for value, dt, category in ratings_query:
+        latest_datetime[category] = max(latest_datetime.get(category, datetime.min), dt)
+
+    # Filter the data to keep only the tuples with the latest datetime for each unique value
+    filtered_data = [(value, dt, category) for value, dt, category in ratings_query if latest_datetime[category] == dt]
+
+
+
+    # Organize data for plotting
+    data_for_plot = defaultdict(lambda: defaultdict(list))
+    for value, date_created, category_description in ratings_query:
+        data_for_plot[category_description]['dates'].append(date_created.strftime('%Y-%m-%d'))  # Format date as string
+        data_for_plot[category_description]['values'].append(value)
+
+    # Prepare data for Chart.js
+    categories = list(data_for_plot.keys())
+    datasets = []
+    for category, details in data_for_plot.items():
+        datasets.append({
+            'Category': category,
+            'Value': details['values'],
+            'Date': details['dates'],  # You'll use this to ensure all datasets have the same x-axis labels
+            # Add more customization for each line here (e.g., backgroundColor, borderColor)
+        })
+
+    return render_template('playerdash.html', ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, categories=categories, user=current_user)
 
 
 
