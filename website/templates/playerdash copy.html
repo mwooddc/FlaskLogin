@@ -23,11 +23,11 @@
         <div class="card-body">
           <!-- <h5 class="card-title">Player ratings for: {{ current_user.Forename }}</h5> -->
           <h5 class="card-title">Coach Ratings Over Time</h5>
-          <!-- Check these for testing purposes
+          Check these for testing purposes
           {{datasets}}<br/><br/>
           {{final_data}}<br/><br/>
           {{categories}}<br/><br/>
-          {{ratings_query}} -->
+          {{ratings_query}}
           
 
           <div id="chart-container">
@@ -64,58 +64,6 @@
 
 
 <script>
-  // Python data structure (final_data) passed from the server
-  // const final_data = {{final_data}}
-  const final_data = {{ final_data | tojson | safe }};
-  // Extracting data from final_data
-  const labels = final_data[0].Date;
-  const datasets = final_data.map(entry => ({
-      label: entry.Category,
-      data: entry.Value,
-      fill: false,
-      borderColor: '#' + (Math.random().toString(16) + '000000').substring(2, 8) // Random color
-  }));
-
-  // Create the chart
-  const ctx = document.getElementById('userRatingsChart').getContext('2d');
-  const myChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-          labels: labels,
-          datasets: datasets
-      },
-      options: {
-        responsive: true,
-          maintainAspectRatio: false,
-          aspectRatio: 0.9, // Set a custom aspect ratio (e.g., 2:1)
-          scales: {
-              y: {
-                  min: 0,
-                  max: 10,
-                  ticks: {
-                      stepSize: 1
-                  }
-              }
-          }
-      }
-  });
-</script>
-
-
-
-
-
-
-
-
-
-
-{% endblock %}
-
-
-
-
-<!-- <script>
   // Extract data from Python variable to JavaScript
   const dataStructure = {{ datasets | tojson | safe }};
   console.log(dataStructure); // Log the value to the console for debugging
@@ -181,7 +129,16 @@
           }
       }
   });
-</script> -->
+</script>
+
+
+
+
+
+
+
+
+{% endblock %}
 
 
 <!-- <script>

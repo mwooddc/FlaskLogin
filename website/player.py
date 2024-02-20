@@ -92,26 +92,36 @@ def playerdashboard():
         })
 
     
-    # Step 1: Find the maximum number of values among all categories
-    max_values = max(len(category['Value']) for category in datasets)
+    # Step 1: Determine all unique dates
+    unique_dates = sorted(set(date for entry in datasets for date in entry['Date']))
 
-    # Step 2: Iterate through each category's 'Value' list
-    for category in datasets:
-        num_values = len(category['Value'])
-        if num_values < max_values:
-            # Step 3: Fill in the remaining values
-            if num_values == 0:
-                # If the list is empty, fill it with zeros
-                category['Value'] = [0] * max_values
+    # Step 2: Adjust values for each category
+    final_data = []
+    for entry in datasets:
+        category = entry['Category']
+        values = entry['Value']
+        dates = entry['Date']
+
+        # Create a dictionary to store values by date
+        date_values = {date: value for date, value in zip(dates, values)}
+
+        # Update values for each unique date
+        adjusted_values = []
+        last_value = None
+        for date in unique_dates:
+            if date in date_values:
+                last_value = date_values[date]
+                adjusted_values.append(last_value)
             else:
-                # Repeat the last value to fill in the remaining values
-                last_value = category['Value'][-1]
-                category['Value'].extend([last_value] * (max_values - num_values))
+                adjusted_values.append(last_value or 0)  # Repeat last value if available, otherwise use 0
+
+        # Append to the final data structure
+        final_data.append({'Category': category, 'Value': adjusted_values, 'Date': unique_dates})
 
 
 
 
-    return render_template('playerdash.html', ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, categories=categories, user=current_user)
+    return render_template('playerdash.html', ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, final_data=final_data, categories=categories, user=current_user)
 
 
 
