@@ -55,10 +55,10 @@ class Match(db.Model, UserMixin):
     tennis_event = db.relationship('TennisEvent', backref='matches')
     player1_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     player2_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    is_doubles = db.Column(db.Boolean, nullable=False, default=False) ### Should call this singles_or_doubles
+    singles_or_doubles = db.Column(db.String(7), nullable=False) ### Should call this singles_or_doubles
     sets_played = db.Column(db.Integer, nullable=False)
     sets_won = db.Column(db.Integer, nullable=False)
-    win_or_loss = db.Column(db.String(4), nullable=False)  # Should call this won_or_lost
+    won_or_lost = db.Column(db.String(4), nullable=False)  # Should call this won_or_lost
     comment = db.Column(db.Text)
 
     player1 = db.relationship('User', foreign_keys=[player1_id], backref='matches_as_player1')
@@ -74,7 +74,7 @@ class School(db.Model, UserMixin):
 class TennisEvent(db.Model, UserMixin):
     __tablename__ = 'tennis_events'
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime(timezone=True)) #### this isn't working right
+    date = db.Column(db.DateTime(timezone=True), nullable=False) #### this isn't working right says data type default, when other dates are text
     venue_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
     venue = db.relationship('School', backref='events')
 
