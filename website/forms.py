@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import IntegerField
-from wtforms.validators import InputRequired, NumberRange
-from wtforms import SelectField
+from wtforms.validators import InputRequired, DataRequired, NumberRange
+from wtforms import SelectField, StringField, SubmitField
 from .models import User, RatingCategory
 
 class UserRatingForm(FlaskForm):
@@ -16,8 +16,12 @@ class UserRatingForm(FlaskForm):
         # Populate the rating category dropdown list with category names
         self.rating_category.choices = [(category.CategoryCode, category.CategoryDescription) for category in RatingCategory.query.all()]
 
-# class UserRatingForm(FlaskForm):
-#     rater_id = IntegerField('Rater ID', validators=[InputRequired()])
-#     ratee_id = IntegerField('Ratee ID', validators=[InputRequired()])
-#     rating_category = IntegerField('Rating Category', validators=[InputRequired()])
-#     value = IntegerField('Value', validators=[InputRequired()])
+class RatingCategoryForm(FlaskForm):
+    category_description = StringField('Category Description', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+
+class AddSchoolForm(FlaskForm):
+    school_name = StringField('School Name', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+

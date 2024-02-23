@@ -1,7 +1,7 @@
-from flask import Blueprint, render_template, session, redirect, url_for
+from flask import Blueprint, render_template, session, flash, redirect, url_for
 from flask_login import login_required, current_user
-from .forms import UserRatingForm
-from .models import db, User, UserRatings
+from .forms import UserRatingForm, RatingCategoryForm, AddSchoolForm
+from .models import db, User, UserRatings, RatingCategory, School
 from .auth import role_required
 
 
@@ -47,13 +47,45 @@ def submit_rating():
         )
         db.session.add(new_rating)
         db.session.commit()
-        return redirect(url_for('coach.success'))
+        # Clear the form data to prepare for the next input
+        # form.ratee_id.data = None
+        # form.rating_category.data = None
+        # form.value.data = None
+        flash('Rating submitted successfully!', 'success')
+        # After clearing the form data, redirect to the same page
+        return redirect(url_for('coach.submit_rating'))
 
-    return render_template('coach.html', form=form, user=current_user)
+    # Render the template with the form and user data
+    return render_template('submit_rating.html', form=form, user=current_user)
 
 
-@coach.route('/success')
+
+@coach.route('/add-rating-category', methods=['GET', 'POST'])
 @login_required
 @role_required('Coach')
-def success():
-    return "Rating submitted successfully!"
+def add_rating_category():
+    form = RatingCategoryForm()
+    if form.validate_on_submit():
+        category_description = form.category_description.data
+        new_category = RatingCategory(CategoryDescription=category_description)
+        db.session.add(new_category)
+        db.session.commit()
+        flash('Rating category added successfully!', 'success')
+        return redirect(url_for('coach.add_rating_category'))
+    return render_template('add_rating_category.html', form=form, user=current_user)
+
+
+
+@coach.route('/add-school', methods=['GET', 'POST'])
+@login_required
+@role_required('Coach')
+def add_school():
+    form = AddSchoolForm()
+    if form.validate_on_submit():
+        school_name = form.school_name.data
+        new_school = School(name=school_name)
+        db.session.add(new_school)
+        db.session.commit()
+        flash('School added successfully!', 'success')
+        return redirect(url_for('coach.add_school'))
+    return render_template('add_school.html', form=form, user=current_user)

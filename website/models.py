@@ -55,10 +55,10 @@ class Match(db.Model, UserMixin):
     tennis_event = db.relationship('TennisEvent', backref='matches')
     player1_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     player2_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    singles_or_doubles = db.Column(db.String(7), nullable=False) ### Should call this singles_or_doubles
+    singles_or_doubles = db.Column(db.String(7), nullable=False)
     sets_played = db.Column(db.Integer, nullable=False)
     sets_won = db.Column(db.Integer, nullable=False)
-    won_or_lost = db.Column(db.String(4), nullable=False)  # Should call this won_or_lost
+    won_or_lost = db.Column(db.String(4), nullable=False)
     comment = db.Column(db.Text)
 
     player1 = db.relationship('User', foreign_keys=[player1_id], backref='matches_as_player1')
@@ -74,30 +74,14 @@ class School(db.Model, UserMixin):
 class TennisEvent(db.Model, UserMixin):
     __tablename__ = 'tennis_events'
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime(timezone=True), nullable=False) #### this isn't working right says data type default, when other dates are text
-    venue_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
-    venue = db.relationship('School', backref='events')
-
-
-
-
-# class Team(db.Model, UserMixin):
-#     __tablename__ = 'teams'
-#     TeamName = db.Column(db.String(255), primary_key=True)
-#     Singles = db.Column(db.Integer)
-#     Doubles = db.Column(db.Integer)
-#     # Relationships
-#     matches = db.relationship('Matches', backref='team', lazy='dynamic')
-#     team_players = db.relationship('TeamPlayers', backref='team', lazy='dynamic')
-
-# class Opposition(db.Model, UserMixin):
-#     __tablename__ = 'opposition'
-#     OppositionName = db.Column(db.String(255), primary_key=True)
-#     Singles = db.Column(db.Integer)
-#     Doubles = db.Column(db.Integer)
-#     Comments = db.Column(db.String(255))
-#     # Relationships
-#     matches = db.relationship('Matches', backref='opposition', lazy='dynamic')
+    date = db.Column(db.DateTime(timezone=True), nullable=False)
+    home_venue_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)#### needs to be HOME venue ID and AWAY venue ID
+    away_venue_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)#### needs to be HOME venue ID and AWAY venue ID
+    # Define the relationship with the School model for the home venue
+    home_venue = db.relationship('School', foreign_keys=[home_venue_id], backref='home_events')
+    
+    # Define the relationship with the School model for the away venue
+    away_venue = db.relationship('School', foreign_keys=[away_venue_id], backref='away_events')
 
 class RatingCategory(db.Model, UserMixin):
     __tablename__ = 'rating_category'

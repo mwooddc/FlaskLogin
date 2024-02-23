@@ -2,15 +2,6 @@
 {% block content%} 
 <body style="background-image: none;">
 
-This is a page that a COACH should be able to see
-
-
-
-
-
-
-
-
 <style>
     /* Adjust line height for form elements */
     .form-holder select,
@@ -34,12 +25,16 @@ This is a page that a COACH should be able to see
     }
 </style>
 
+
+
 <form method="POST" action="{{ url_for('coach.submit_rating') }}" class="wrapper">
     {{ form.csrf_token }}
     {{ form.hidden_tag() }}
 
     <section>
+        Select a Player and submit their rating for a particular category
         <div class="inner">
+            
             <div class="form-row form-group">
                 <div class="form-holder">
                     <label for="ratee_id">Player:</label>
@@ -65,6 +60,7 @@ This is a page that a COACH should be able to see
             </div>
         </div>
     </section>
+    
 </form>
 
 
