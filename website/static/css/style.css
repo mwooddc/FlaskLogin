@@ -48,8 +48,8 @@ input, textarea, select, button {
   color: #333; }
 
 select {
-  -moz-appearance: none;
-  -webkit-appearance: none;
+  /* -moz-appearance: none;
+  -webkit-appearance: none; */
   cursor: pointer; }
   select option[value=""][disabled] {
     display: none; }

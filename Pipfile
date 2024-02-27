@@ -11,6 +11,7 @@ werkzeug = "*"
 flask-wtf = "*"
 wtforms = "*"
 faker = "*"
+sqlalchemy-utils = "*"
 
 [dev-packages]
 
