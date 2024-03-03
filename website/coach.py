@@ -251,7 +251,7 @@ def submit_users():
         raw_data = request.form.to_dict(flat=False)
         print(raw_data)
         users = []
-        # print("USERS",users)
+        print("USERS",users)
 
         # Use regex to correctly extract index and field names
         pattern = re.compile(r'users\[(\d+)\]\[(\w+)\]')
@@ -269,7 +269,7 @@ def submit_users():
                 # Assign the field value to the appropriate user dictionary
                 users[index][field] = value[0]
 
-        # print("USERS2",users)
+        print("USERS2",users)
 
         errors = {}
         valid_data = []
@@ -292,7 +292,7 @@ def submit_users():
             if user_errors:
                 errors[i] = user_errors
 
-        # print("ERRORS",errors)
+        print("ERRORS",errors)
 
         if errors:
 
