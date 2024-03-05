@@ -5,7 +5,7 @@
 
     <h1>Create An Event</h1>
     <form id="eventForm" action="{{ url_for('coach.create_event_and_matches') }}" method="POST">
-        {{ event_form.csrf_token }}
+        <!-- {{ event_form.csrf_token }} -->
 
         <!-- TennisEvent details -->
         <label for="date">Date:</label>

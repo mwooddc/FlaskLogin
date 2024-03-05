@@ -246,119 +246,72 @@ def determine_number_of_matches(request):
 @login_required
 @role_required('Coach')
 def submit_users():
-    schools = School.query.all()
-    #to ge the players as a list of tuples:
-    # player_choices = [(str(user.id), f'{user.Forename} {user.Surname}') for user in User.query.filter_by(Role='Player').all()]
-    #to get the players as a list of dictionaries:
-    player_choices = [
-    {"user_id": str(user.id), "user_name": f"{user.Forename} {user.Surname}"}
-    for user in User.query.filter_by(Role='Player').all()]
-    print("Player Choices:", player_choices)
-
     if request.method == 'POST':
         
         raw_data = request.form.to_dict(flat=False)
         print(raw_data)
-        event = []
-        print("Event",event)
+        users = []
+        print("USERS",users)
 
-        # Populate player choices
+        # Use regex to correctly extract index and field names
+        pattern = re.compile(r'users\[(\d+)\]\[(\w+)\]')
 
-
-
-
-
-
-
-        # Initialize the parsed data with keys that should have their values as integers
-        event = {
-            'date': raw_data['date'][0],
-            'home_venue': int(raw_data['home_venue'][0]),
-            'away_venue': int(raw_data['away_venue'][0]),
-            'matches': []
-        }
-
-        # Define keys within matches that need their values converted to integers
-        integer_keys = ['player1_name', 'player2_name', 'sets_played', 'sets_won']
-
-        # Parse the match data
         for key, value in raw_data.items():
-            if key.startswith('match'):
-                # Extract the match index and attribute name
-                parts = key.split('[')
-                match_index = int(parts[1].split(']')[0])
-                attribute_name = parts[2].split(']')[0]
+            match = pattern.match(key)
+            if match:
+                index, field = match.groups()
+                index = int(index)  # Convert index to integer
 
-                # Ensure the matches list is long enough
-                while len(event['matches']) <= match_index:
-                    event['matches'].append({})
+                # Ensure the list is large enough to hold this index
+                while len(users) <= index:
+                    users.append({})
 
-                # Convert to integer if in integer_keys, otherwise assign directly
-                if attribute_name in integer_keys:
-                    event['matches'][match_index][attribute_name] = int(value[0])
-                else:
-                    event['matches'][match_index][attribute_name] = value[0]
+                # Assign the field value to the appropriate user dictionary
+                users[index][field] = value[0]
 
+        print("USERS2",users)
+        print("TYPE",type(users[0]['id']))## MUST convert integer fields into integers
 
+        errors = {}
+        valid_data = []
 
+        # Validate each user's data
+        for i, user in enumerate(users):
+            user_id = user.get('id', '')
+            name = user.get('name', '')
+            age = user.get('age', '')
+            user_errors = []
 
-        print("Event Updated",event)
+            # Validation checks
+            if not user_id or not user_id.isdigit():
+                user_errors.append("ID must be a number and cannot be blank")
+            if not name:
+                user_errors.append("Name must not be blank")
+            if not age or not age.isdigit() or not 1 <= int(age) <= 100:
+                user_errors.append("Age must be a number between 1 and 100")
 
-        errors = []
+            if user_errors:
+                errors[i] = user_errors
 
-        # Loop through each match in the "matches" list with updated error message
-        for i, match in enumerate(event['matches']):
-            if match['sets_won'] > match['sets_played']:
-                # Append the customized error message including the match number (i+1 for human-readable numbering)
-                errors.append(f"Error in Match {i+1}: Sets won can not exceed sets played")
-
-        print("NEW ERRORS",errors)
-
-
-        # errors = {}
-        # valid_data = []
-
-        # # Validate each user's data
-        # for i, user in enumerate(matches):
-        #     user_id = user.get('id', '')
-        #     name = user.get('name', '')
-        #     age = user.get('age', '')
-        #     user_errors = []
-
-        #     # Validation checks
-        #     if not user_id or not user_id.isdigit():
-        #         user_errors.append("ID must be a number and cannot be blank")
-        #     if not name:
-        #         user_errors.append("Name must not be blank")
-        #     if not age or not age.isdigit() or not 1 <= int(age) <= 100:
-        #         user_errors.append("Age must be a number between 1 and 100")
-
-        #     if user_errors:
-        #         errors[i] = user_errors
-
-        # print("ERRORS",errors)
+        print("ERRORS",errors)
 
         if errors:
-            for e in errors:
-                flash(e)
 
+            for key, error_list in errors.items():
+                error_messages = ', '.join(error_list)  # Join all errors in the list into a single string
+                flash(f"Match {key + 1} has these errors: {error_messages}")
 
-            # for key, error_list in errors.items():
-            #     error_messages = ', '.join(error_list)  # Join all errors in the list into a single string
-            #     flash(f"Match {key + 1} has these errors: {error_messages}")
-
-            return render_template('test.html', errors=errors, user=current_user, event=event, schools=schools, players=player_choices)
+            return render_template('test.html', errors=errors, user=current_user, users=users)
         else:
             # return "All users added successfully", 200
-            flash('matches added successfully!')
+            flash('Users added successfully!')
             return redirect(url_for('coach.submit_users'))  # Redirect back to the form
-            # return render_template('test.html', errors=errors, user=current_user, event=event, schools=schools)
 
         # Proceed to JSON generation and database insertion if data is valid
         # Assume valid_data is the data to be inserted
         # Generate JSON file and insert into database here
     # For GET request, just render the template
-    return render_template('test.html', user=current_user, schools=schools, players=player_choices)
+    return render_template('test.html', user=current_user)
 
 
 

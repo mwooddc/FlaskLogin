@@ -1,0 +1,30 @@
+{% extends "base.html" %} {% block title %}Sign Up{% endblock %} {% block
+    content %}
+    <body style="background-image: none;"></body>
+
+    <script src="{{url_for('static', filename='js/match_form.js') }}"></script>
+    
+</head>
+<body>
+
+
+
+    <form method="POST" action="{{ url_for('coach.submit_users') }}">
+        <div id="userForms">
+            {{users}}
+            {% for user in users %}
+                <div id="form{{ loop.index0 }}">
+                    ID: <input type="text" name="users[{{ loop.index0 }}][id]" placeholder="ID" value="{{ user['id'] }}">
+                    Name: <input type="text" name="users[{{ loop.index0 }}][name]" placeholder="Name" value="{{ user['name'] }}">
+                    Age: <input type="text" name="users[{{ loop.index0 }}][age]" placeholder="Age" value="{{ user['age'] }}">
+                    <button type="button" onclick="removeUserForm(`form{{ loop.index0 }}`)">Remove User</button>
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" onclick="addUserForm()">Add User</button>
+        
+        <input type="submit" value="Submit">
+    </form>
+
+
+{% endblock %}
