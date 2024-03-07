@@ -355,6 +355,48 @@ def submit_users():
             return render_template('test.html', errors=errors, user=current_user, event=event, schools=schools, players=players_dict)
         else:
             # return "All users added successfully", 200
+
+
+
+            # Convert the date from string to datetime object
+            event_date = datetime.strptime(event['date'], "%Y-%m-%d")
+
+            # Create a TennisEvent instance
+            tennis_event = TennisEvent(
+                date=event_date,
+                home_venue_id=event['home_venue'],
+                away_venue_id=event['away_venue']
+            )
+
+            # Add to session and commit to database
+            db.session.add(tennis_event)
+            db.session.commit()
+
+
+
+
+
+            for match_data in event['matches']:
+                match = Match(
+                    tennis_event_id=tennis_event.id,
+                    player1_id=match_data['player1_name'],  # Assuming player IDs are directly usable
+                    player2_id=match_data['player2_name'],
+                    singles_or_doubles=match_data['singles_or_doubles'],
+                    sets_played=match_data['sets_played'],
+                    sets_won=match_data['sets_won'],
+                    won_or_lost=match_data['won_or_lost'],
+                    comment=match_data['comment']
+                )
+                db.session.add(match)
+
+            # Commit all matches to the database
+            db.session.commit()
+
+
+
+
+
+
             flash('matches added successfully!')
             return redirect(url_for('coach.submit_users'))  # Redirect back to the form
             # return render_template('test.html', errors=errors, user=current_user, event=event, schools=schools)
