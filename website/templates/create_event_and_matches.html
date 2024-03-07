@@ -1,11 +1,23 @@
 {% extends "base.html" %} {% block title %}Sign Up{% endblock %} {% block
     content %}
+
+    <script src="{{url_for('static', filename='js/match_form.js') }}"></script>
+    <!-- Using a script tag with a non-JavaScript type to hide the players json in
+    which I can then access from an external javascript file -->
+    <script type="application/json" id="players">
+        {{ (players or [])|tojson }}
+    </script>
+
+
     
-    <body style="background-image: none;">
+    
+</head>
+<body style="background-image: none;">
+
+
 
     <h1>Create An Event</h1>
-    <form id="eventForm" action="{{ url_for('coach.create_event_and_matches') }}" method="POST">
-        <!-- {{ event_form.csrf_token }} -->
+    <form method="POST" action="{{ url_for('coach.create_event_and_matches') }}">
 
         <!-- TennisEvent details -->
         <label for="date">Date:</label>
@@ -27,113 +39,69 @@
 
         <h1>Create A Match</h1>
 
-        <!-- Match fields -->
+
         <div id="match-fields">
-
-            <div class="match">
-                <!-- Dropdown list for Player 1 -->
-                <label for="player1_name">Player 1:</label>
-                <select id="player1_name" name="player1_name">
-                    {% for user_id, user_name in match_form.player1_name.choices %}
-                    <option value="{{ user_id }}">{{ user_name }}</option>
-                    {% endfor %}
-                </select>
+            {% if event is defined and 'matches' in event %}
+                {% for match in event['matches'] %}
                 
-                <!-- Dropdown list for Player 2 -->
-                <label for="player2_name">Player 2:</label>
-                <select id="player2_name" name="player2_name">
-                    {% for user_id, user_name in match_form.player2_name.choices %}
-                    <option value="{{ user_id }}">{{ user_name }}</option>
-                    {% endfor %}
-                </select>
+                    <div class="match-entry" id="match{{ loop.index0 }}">
+                        Player 1 Name:
+                        <select name="match[{{ loop.index0 }}][player1_name]" required>
+                            {% for user_id, user_name in players.items() %}
+                            <option value="{{ user_id }}" {% if match['player1_name']|string == user_id %}selected{% endif %}>
+                                {{ user_name }}
+                            </option>
+                            {% endfor %}
+                        </select><br><br>
 
-                <!-- Other match fields -->
-            </div><br>
-
-
-                <label for="singles_or_doubles">Singles or Doubles:</label>
-                <select id="singles_or_doubles" name="singles_or_doubles" required>
-                    <option value="Singles">Singles</option>
-                    <option value="Doubles">Doubles</option>
-                </select><br><br>
-
-                <label for="sets_played">Sets Played:</label>
-                <input type="number" id="sets_played" name="sets_played" min="1" required><br><br>
-
-                <label for="sets_won">Sets Won:</label>
-                <input type="number" id="sets_won" name="sets_won" min="0" required><br><br>
-
-                <label for="won_or_lost">Won or Lost:</label>
-                <select id="won_or_lost" name="won_or_lost" required>
-                    <option value="Won">won</option>
-                    <option value="Lost">Lost</option>
-                </select><br><br>
-
-                <label for="comment">Comment:</label>
-                <textarea id="comment" name="comment"></textarea><br><br>
-
+            
+                        Player 2 Name:
+                        <select name="match[{{ loop.index0 }}][player2_name]" required>
+                            {% for user_id, user_name in players.items() %}
+                            <option value="{{ user_id }}" {% if match['player2_name']|string == user_id %}selected{% endif %}>
+                                {{ user_name }}
+                            </option>
+                            {% endfor %}
+                        </select><br><br>
+            
+                        Singles or Doubles:
+                        <select name="match[{{ loop.index0 }}][singles_or_doubles]" required>
+                            <option value="Singles" {% if match['singles_or_doubles'] == 'Singles' %}selected{% endif %}>Singles</option>
+                            <option value="Doubles" {% if match['singles_or_doubles'] == 'Doubles' %}selected{% endif %}>Doubles</option>
+                        </select><br><br>
+            
+                        Sets Played:
+                        <input type="number" name="match[{{ loop.index0 }}][sets_played]" placeholder="Sets Played" value="{{ match['sets_played'] }}" min="1" required><br><br>
+            
+                        Sets Won:
+                        <input type="number" name="match[{{ loop.index0 }}][sets_won]" placeholder="Sets Won" value="{{ match['sets_won'] }}" min="0" required><br><br>
+            
+                        Won or Lost:
+                        <select name="match[{{ loop.index0 }}][won_or_lost]" required>
+                            <option value="Won" {% if match['won_or_lost'] == 'Won' %}selected{% endif %}>Won</option>
+                            <option value="Lost" {% if match['won_or_lost'] == 'Lost' %}selected{% endif %}>Lost</option>
+                        </select><br><br>
+            
+                        Comment:
+                        <textarea name="match[{{ loop.index0 }}][comment]" placeholder="Comment">{{ match['comment'] }}</textarea><br><br>
+            
+                        <button type="button" onclick="remove_match('match{{ loop.index0 }}')">Remove Match</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
             </div>
-
-        </div>
-
+            
+        
         <button type="button" onclick="addMatch()">Add Match</button>
-        <button type="submit">Submit</button>
+        
+        <input type="submit" value="Submit">
     </form>
 
-        <script>
-            var matchCounter = 1;
-        
-            function addMatch() {
-                var container = document.getElementById("match-fields");
-                var matchDiv = document.createElement("div");
-                matchDiv.innerHTML = `
-                    <div class="match">
-                        <!-- Dropdown list for Player 1 -->
-                        <label for="player1_name_${matchCounter}">Player 1:</label>
-                        <select id="player1_name_${matchCounter}" name="player1_name_${matchCounter}">
-                            {% for user_id, user_name in match_form.player1_name.choices %}
-                            <option value="{{ user_id }}">{{ user_name }}</option>
-                            {% endfor %}
-                        </select>
-                        
-                        <!-- Dropdown list for Player 2 -->
-                        <label for="player2_name_${matchCounter}">Player 2:</label>
-                        <select id="player2_name_${matchCounter}" name="player2_name_${matchCounter}">
-                            {% for user_id, user_name in match_form.player2_name.choices %}
-                            <option value="{{ user_id }}">{{ user_name }}</option>
-                            {% endfor %}
-                        </select>
-        
-                        <!-- Other match fields -->
-                        <label for="singles_or_doubles_${matchCounter}">Singles or Doubles:</label>
-                        <select id="singles_or_doubles_${matchCounter}" name="singles_or_doubles_${matchCounter}" required>
-                            <option value="Singles">Singles</option>
-                            <option value="Doubles">Doubles</option>
-                        </select><br><br>
-        
-                        <label for="sets_played_${matchCounter}">Sets Played:</label>
-                        <input type="number" id="sets_played_${matchCounter}" name="sets_played_${matchCounter}" min="1" required><br><br>
-        
-                        <label for="sets_won_${matchCounter}">Sets Won:</label>
-                        <input type="number" id="sets_won_${matchCounter}" name="sets_won_${matchCounter}" min="0" required><br><br>
-        
-                        <label for="won_or_lost_${matchCounter}">Won or Lost:</label>
-                        <select id="won_or_lost_${matchCounter}" name="won_or_lost_${matchCounter}" required>
-                            <option value="Won">won</option>
-                            <option value="Lost">Lost</option>
-                        </select><br><br>
-        
-                        <label for="comment_${matchCounter}">Comment:</label>
-                        <textarea id="comment_${matchCounter}" name="comment_${matchCounter}"></textarea><br><br>
-                    </div><br>
-                `;
-                container.appendChild(matchDiv);
-                matchCounter++;
-            }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPlayersData();
+        });
         </script>
-        
-        
-
-
+    
 
 {% endblock %}

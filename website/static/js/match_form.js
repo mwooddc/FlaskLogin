@@ -35,14 +35,6 @@ function addMatch() {
     player1_name.setAttribute("name", `match[${formCount}][player1_name]`);
     player1_name.setAttribute("id", "player1_name"); // Setting the ID for the select element, useful for label association
 
-    // // Iterate over playerChoices to create and append option elements
-    // players.forEach(function(choice) {
-    //     let option = document.createElement("option");
-    //     option.value = choice.user_id;
-    //     option.textContent = choice.user_name;
-    //     player1_name.appendChild(option);
-    // });
-
     // Iterate over players dictionary to create and append option elements
     Object.entries(players).forEach(function([user_id, user_name]) {
         let option = document.createElement("option");
@@ -61,14 +53,6 @@ function addMatch() {
     let player2_name = document.createElement("select");
     player2_name.setAttribute("name", `match[${formCount}][player2_name]`);
     player2_name.setAttribute("id", "player2_name"); // Setting the ID for the select element, useful for label association
-
-    // // Iterate over playerChoices to create and append option elements
-    // players.forEach(function(choice) {
-    //     let option = document.createElement("option");
-    //     option.value = choice.user_id;
-    //     option.textContent = choice.user_name;
-    //     player2_name.appendChild(option);
-    // });
 
     // Iterate over players dictionary to create and append option elements to player2_name select
     Object.entries(players).forEach(function([user_id, user_name]) {
