@@ -1,0 +1,6 @@
+TODO:
+Make the colour scheme navy maroon and white
+Be able to change the colour scheme - Navy: #353f4c Maroon: #8e1537 White: #ffffff Light Pink: #eba3b1
+
+BUGS:
+There is an issue if you add a match, there are errors in one of the matches, you submit the form then when the data comes back you remove a match.

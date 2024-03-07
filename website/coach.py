@@ -345,7 +345,7 @@ def submit_users():
 
         if errors:
             for e in errors:
-                flash(e)
+                flash(e, 'error')
 
 
             # for key, error_list in errors.items():
@@ -592,6 +592,11 @@ def create_event_and_matches():
 
 
 
+@coach.route('/settings', methods=['GET', 'POST'])
+@login_required
+@role_required('Coach')
+def settings():
+    return render_template('settings.html', user=current_user)
 
 
 

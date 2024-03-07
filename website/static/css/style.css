@@ -1,3 +1,79 @@
+/*
+Colour Scheme
+Navy: #353f4c
+Maroon: #8e1537
+White: #ffffff
+Light Pink: #eba3b1
+Green: #158e6c
+*/
+
+
+:root {
+  --background-color-light: #FFFFFF; /* White for light mode */
+  --background-color-dark: #353f4c; /* Dark grey for dark mode */
+}
+
+body.light-mode {
+  background-color: var(--background-color-light);
+}
+
+body.dark-mode {
+  background-color: var(--background-color-dark);
+}
+
+
+
+.background_grey {
+  background-color: #353f4c;
+}
+
+.alert, .alert-success {
+  background-color: #8e1537 !important; /* Ensure this overrides Bootstrap */
+  color: white !important; /* Ensures text color is white */
+}
+
+
+.maroon-btn {
+  background-color: #8e1537; /* Green background */
+  color: white; /* White text */
+}
+
+.green-btn {
+  background-color: #158e6c; /* Green background */
+  color: white; /* White text */
+}
+
+.pink-btn {
+  background-color: #eba3b1; /* Green background */
+  color: white; /* White text */
+}
+
+
+.white_on_grey {
+  background-color: #353f4c;
+  color: #ffffff;
+  margin-top: 20px;
+}
+
+.lightgrey{
+  background-color:#f2f2f2;
+}
+
+.padding_top_10{
+  padding-top: 10px;
+}
+
+/* Custom CSS to increase line height and adjust form field appearance */
+.form-control, label {
+  line-height: 1.1; /* Adjust line height as needed */
+  height: auto; /* Ensure height adjusts to content */
+  padding-bottom: 5px; /* Adjust padding to ensure text is not cut off */
+}
+
+.form-control {
+  margin-bottom: 10px; /* Add some space below each field */
+}
+
 @font-face {
   font-family: "Poppins-Regular";
   src: url("../fonts/poppins/Poppins-Regular.ttf"); }
@@ -68,7 +144,9 @@ a {
 textarea {
   resize: none; }
 
-img {
+
+
+  img {
   max-width: 100%;
   vertical-align: middle; }
 

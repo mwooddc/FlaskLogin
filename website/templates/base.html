@@ -8,6 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- JAVASCRIPT -->
+  <script src="{{url_for('static', filename='js/settings.js') }}"></script>
   <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.13.1/cdn/shoelace-autoloader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
   <script src="https://cdn.datatables.net/v/dt/jq-3.7.0/dt-1.13.8/af-2.6.0/b-2.4.2/b-colvis-2.4.2/b-html5-2.4.2/b-print-2.4.2/cr-1.7.0/date-1.5.1/rr-1.4.1/sc-2.3.0/sp-2.2.0/sl-1.7.0/datatables.min.js"></script>
@@ -90,14 +91,16 @@
 
           <!-- ALL USERS LOGGED IN: -->
           <li class="nav-item">
-            <a class="nav-link" href="#">Notifications <span id="notification-badge" class="badge-custom">0</span> <i class="fas fa-bell"></i></a>
+            <a class="nav-link" href="#">Notifications<sl-badge variant="danger" pill pulse>6</sl-badge> <i class="fas fa-bell"></i></a><!-- Remove Word Pulse if you don't want flashing: -->
           </li>
+
+
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               Profile <i class="fas fa-user"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-              <a class="dropdown-item" href="#">Settings</a>
+              <a class="dropdown-item" href="/settings">Settings</a>
               <a class="dropdown-item" href="/logout">Logout</a>
             </div>
           </li>
@@ -166,7 +169,7 @@
     </script>
 
 
-
+<script src="{{url_for('static', filename='js/settings.js') }}"></script>
 
 </body>
 
