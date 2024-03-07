@@ -1,9 +1,9 @@
 {% extends "base.html" %} {% block title %}Sign Up{% endblock %} {% block
     content %}
-    <body style="background-image: none;"></body>
 
     <script src="{{url_for('static', filename='js/match_form.js') }}"></script>
-    <!-- Using a script tag with a non-JavaScript type -->
+    <!-- Using a script tag with a non-JavaScript type to hide the players json in
+    which I can then access from an external javascript file -->
     <script type="application/json" id="players">
         {{ players|tojson }}
     </script>
@@ -12,7 +12,7 @@
     
     
 </head>
-<body>
+<body style="background-image: none;">
 
 
 
@@ -43,18 +43,24 @@
         <div id="match-fields">
             {% if event is defined and 'matches' in event %}
                 {% for match in event['matches'] %}
+                
                     <div class="match-entry" id="match{{ loop.index0 }}">
                         Player 1 Name:
                         <select name="match[{{ loop.index0 }}][player1_name]" required>
-                            {% for player_id, player_name in players %}
-                            <option value="{{ player_id }}" {% if match['player1_name']|string == player_id %}selected{% endif %}>{{ player_name }}</option>
+                            {% for user_id, user_name in players.items() %}
+                            <option value="{{ user_id }}" {% if match['player1_name']|string == user_id %}selected{% endif %}>
+                                {{ user_name }}
+                            </option>
                             {% endfor %}
                         </select><br><br>
+
             
                         Player 2 Name:
                         <select name="match[{{ loop.index0 }}][player2_name]" required>
-                            {% for player_id, player_name in players %}
-                            <option value="{{ player_id }}" {% if match['player2_name']|string == player_id %}selected{% endif %}>{{ player_name }}</option>
+                            {% for user_id, user_name in players.items() %}
+                            <option value="{{ user_id }}" {% if match['player2_name']|string == user_id %}selected{% endif %}>
+                                {{ user_name }}
+                            </option>
                             {% endfor %}
                         </select><br><br>
             
@@ -91,5 +97,11 @@
         <input type="submit" value="Submit">
     </form>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPlayersData();
+        });
+        </script>
+    
 
 {% endblock %}

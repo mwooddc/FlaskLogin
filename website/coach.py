@@ -255,6 +255,11 @@ def submit_users():
     for user in User.query.filter_by(Role='Player').all()]
     print("Player Choices:", player_choices)
 
+    # Convert players list to a dictionary {user_id: user_name}
+    players_dict = {player['user_id']: player['user_name'] for player in player_choices}
+    print("PlayerDictionary:", players_dict)
+
+
     if request.method == 'POST':
         
         raw_data = request.form.to_dict(flat=False)
@@ -347,7 +352,7 @@ def submit_users():
             #     error_messages = ', '.join(error_list)  # Join all errors in the list into a single string
             #     flash(f"Match {key + 1} has these errors: {error_messages}")
 
-            return render_template('test.html', errors=errors, user=current_user, event=event, schools=schools, players=player_choices)
+            return render_template('test.html', errors=errors, user=current_user, event=event, schools=schools, players=players_dict)
         else:
             # return "All users added successfully", 200
             flash('matches added successfully!')
@@ -358,7 +363,7 @@ def submit_users():
         # Assume valid_data is the data to be inserted
         # Generate JSON file and insert into database here
     # For GET request, just render the template
-    return render_template('test.html', user=current_user, schools=schools, players=player_choices)
+    return render_template('test.html', user=current_user, schools=schools, players=players_dict)
 
 
 

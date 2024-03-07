@@ -1,15 +1,28 @@
 
+// Define players in the broader scope to make it accessible inside addMatch
+var players = null;
 
+// Function to parse players data
+function loadPlayersData() {
+    var playersdata = document.getElementById('players').textContent;
+    players = JSON.parse(playersdata);
+    console.log(players);
+
+}
 
 function addMatch() {
 
-    // Access the script id players from test.html
+    // Access the script id players from test.html which contains the data set
+    // I need to do it this way as you can not use Jinja in an external js file
     var playersdata = document.getElementById('players').textContent;
     var players = JSON.parse(playersdata);
+    console.log(players);
 
     let container = document.getElementById("match-fields");
     let formCount = container.children.length;
     console.log(formCount);
+    
+
 
     // Create a new div element for the new user form
     let newUserForm = document.createElement("div");
@@ -22,11 +35,19 @@ function addMatch() {
     player1_name.setAttribute("name", `match[${formCount}][player1_name]`);
     player1_name.setAttribute("id", "player1_name"); // Setting the ID for the select element, useful for label association
 
-    // Iterate over playerChoices to create and append option elements
-    players.forEach(function(choice) {
+    // // Iterate over playerChoices to create and append option elements
+    // players.forEach(function(choice) {
+    //     let option = document.createElement("option");
+    //     option.value = choice.user_id;
+    //     option.textContent = choice.user_name;
+    //     player1_name.appendChild(option);
+    // });
+
+    // Iterate over players dictionary to create and append option elements
+    Object.entries(players).forEach(function([user_id, user_name]) {
         let option = document.createElement("option");
-        option.value = choice.user_id;
-        option.textContent = choice.user_name;
+        option.value = user_id;
+        option.textContent = user_name;
         player1_name.appendChild(option);
     });
 
@@ -41,13 +62,22 @@ function addMatch() {
     player2_name.setAttribute("name", `match[${formCount}][player2_name]`);
     player2_name.setAttribute("id", "player2_name"); // Setting the ID for the select element, useful for label association
 
-    // Iterate over playerChoices to create and append option elements
-    players.forEach(function(choice) {
+    // // Iterate over playerChoices to create and append option elements
+    // players.forEach(function(choice) {
+    //     let option = document.createElement("option");
+    //     option.value = choice.user_id;
+    //     option.textContent = choice.user_name;
+    //     player2_name.appendChild(option);
+    // });
+
+    // Iterate over players dictionary to create and append option elements to player2_name select
+    Object.entries(players).forEach(function([user_id, user_name]) {
         let option = document.createElement("option");
-        option.value = choice.user_id;
-        option.textContent = choice.user_name;
-        player2_name.appendChild(option);
+        option.value = user_id; // The user_id is the key in the players dictionary
+        option.textContent = user_name; // The user_name is the value in the players dictionary
+        player2_name.appendChild(option); // Append the option to the player2_name select element
     });
+
 
     // Append the select element to the newUserForm
     newUserForm.appendChild(player2_name);
