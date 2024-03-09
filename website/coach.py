@@ -104,143 +104,6 @@ def determine_number_of_matches(request):
     return max_index
 
 
-# @coach.route('/create-event-and-matches', methods=['GET', 'POST'])
-# @login_required
-# @role_required('Coach')
-# def create_event_and_matches():
-#     try:
-#         event_form = TennisEventForm()
-#         match_form = MatchForm()
-#         errors = {}  # Initialize errors
-#         form_data = dict(request.form)
-
-
-
-#         # if request.method == 'POST':
-#         #     print("Form Data:", request.form)
-#             # print("Won or Lost Value:", form_data.get('won_or_lost'))
-        
-#         print("DICTIONARY of form_data",  form_data)
-
-#         # Fetch schools data from the database
-#         schools = School.query.all()
-
-#         # Populate player choices
-#         player_choices = [(str(user.id), f'{user.Forename} {user.Surname}') for user in User.query.filter_by(Role='Player').all()]
-#         print("Player Choices:", player_choices)
-
-#         match_form.player1_name_0.choices = [('None', 'None')] + player_choices
-#         match_form.player2_name_0.choices = [('None', 'None')] + player_choices
-
-
-#         if request.method == 'POST' and match_form.validate():
-#             return jsonify({'status': 'success'})
-#             all_fields_valid = True
-
-#             # Iterate over dynamically added fields
-#             for key, value in request.form.items():
-#                 if key.startswith('player2_name'):
-#                     # Extract the corresponding 'singles_or_doubles' value
-#                     # Assuming the naming convention holds for dynamically added fields
-#                     singles_or_doubles_key = 'singles_or_doubles' + key[len('player2_name'):]
-#                     singles_or_doubles_value = request.form.get(singles_or_doubles_key, '')
-                    
-#                     # Apply your custom validation logic
-#                     if singles_or_doubles_value == 'Singles' and value != 'None':
-#                         flash(f"Validation error for {key}: For Singles, 'None' must be selected for Player 2.", 'danger')
-#                         all_fields_valid = False
-#                         break  # Optionally break if one validation fails, or continue to check all fields
-
-#             if all_fields_valid:
-#                 # Proceed with processing the form and saving data
-#                 # pass  # Your logic here
-
-
-#                 # Process form data for TennisEvent
-#                 event_date = datetime.strptime(request.form['date'], '%Y-%m-%d')
-#                 new_event = TennisEvent(date=event_date,
-#                                         home_venue_id=request.form['home_venue'],
-#                                         away_venue_id=request.form['away_venue'])
-#                 db.session.add(new_event)
-#                 db.session.commit()
-
-#                 # form_data = dict(request.form)
-#                 print("DICTIONARY of form_data",  form_data)
-
-#                 max_index = determine_number_of_matches(form_data)
-#                 print("MAX INDEX",max_index)
-
-
-#                 # Initialize a variable to keep track of player index
-#                 player_index = 0
-
-
-#                 while True:
-#                     # if player_index == 0:
-#                     #     player1_name = form_data["player1_name"]
-#                     #     player2_name = form_data["player2_name"]
-#                     #     singles_or_doubles = form_data["singles_or_doubles"]
-#                     #     sets_played = form_data["sets_played"]
-#                     #     sets_won = form_data["sets_won"]
-#                     #     won_or_lost = form_data["won_or_lost"]
-#                     #     comment = form_data["comment"]
-#                     # else:
-#                     player_key = f"player1_name_{player_index}"
-                    
-#                     if player_key in form_data:
-#                         # Assign values to separate variables
-#                         player1_name = form_data.get(f'player1_name_{player_index}', "")
-#                         player2_name = form_data.get(f'player2_name_{player_index}', "")
-#                         singles_or_doubles = form_data.get(f"singles_or_doubles_{player_index}", "")
-#                         sets_played = form_data.get(f"sets_played_{player_index}", "")
-#                         sets_won = form_data.get(f"sets_won_{player_index}", "")
-#                         won_or_lost = form_data.get(f"won_or_lost_{player_index}", "")
-#                         comment = form_data.get(f"comment_{player_index}", "")
-
-#                     else:
-#                         break
-#                     new_match = Match(tennis_event_id=new_event.id,
-#                                             player1_id=player1_name,
-#                                             player2_id=player2_name,
-#                                             singles_or_doubles=singles_or_doubles,
-#                                             sets_played=sets_played,
-#                                             sets_won=sets_won,
-#                                             won_or_lost=won_or_lost,
-#                                             comment=comment)
-#                     player_index += 1
-#                     db.session.add(new_match)
-#                 db.session.commit()
-                            
-                    
-
-#                 return redirect(url_for('coach.create_event_and_matches'))
-            
-#         elif request.method == 'POST':
-#             errors = {field_name: error_messages for field_name, error_messages in match_form.errors.items()}
-#             return jsonify({'status': 'failure', 'errors': errors}), 400
-        
-#             if not match_form.validate():
-#                 print("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
-#                 max_index = determine_number_of_matches(form_data)
-#                 # flash('There were errors in your form, please review them.', 'danger')
-#                 # Assuming you have a way to track dynamic fields
-#                 errors = {f'player2_name_{i}': match_form.errors.get(f'player2_name_{i}', [])
-#                         for i in range(max_index)}  # number_of_matches is dynamic
-#                 # errors={"Hey":"Mark"}
-#                 print("ERRRORS",errors)
-#                 return render_template('create_event_and_matches.html', event_form=event_form, match_form=match_form, user=current_user, schools=schools, errors=errors)
-#                 # Form validation failed
-                
-
-#         return render_template('create_event_and_matches.html', event_form=event_form, match_form=match_form, user=current_user, schools=schools)
-
-#     except Exception as e:
-#         print("ERRRRRRRRRRRRRRRRRRRRRROR")
-#         return jsonify({'status': 'error', 'message': str(e)}), 500
-
-
-
-
 
 @coach.route('/submit', methods=['GET', 'POST'])
 @login_required
@@ -268,11 +131,6 @@ def submit_users():
         print("Event",event)
 
         # Populate player choices
-
-
-
-
-
 
 
         # Initialize the parsed data with keys that should have their values as integers
@@ -345,7 +203,7 @@ def submit_users():
 
         if errors:
             for e in errors:
-                flash(e, 'error')
+                flash(e, 'danger')
 
 
             # for key, error_list in errors.items():
@@ -592,11 +450,11 @@ def create_event_and_matches():
 
 
 
-@coach.route('/settings', methods=['GET', 'POST'])
-@login_required
-@role_required('Coach')
-def settings():
-    return render_template('settings.html', user=current_user)
+# @coach.route('/settings', methods=['GET', 'POST'])
+# @login_required
+# @role_required('Coach')
+# def settings():
+#     return render_template('settings.html', user=current_user)
 
 
 

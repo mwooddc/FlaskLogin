@@ -27,7 +27,12 @@ body.dark-mode {
   background-color: #353f4c;
 }
 
-.alert, .alert-success {
+.alert-success {
+  background-color: #158e6c !important; /* Ensure this overrides Bootstrap */
+  color: white !important; /* Ensures text color is white */
+}
+
+.alert-danger {
   background-color: #8e1537 !important; /* Ensure this overrides Bootstrap */
   color: white !important; /* Ensures text color is white */
 }
@@ -53,6 +58,17 @@ body.dark-mode {
   background-color: #353f4c;
   color: #ffffff;
   margin-top: 20px;
+}
+
+.h5_white_on_grey {
+  background-color: #353f4c;
+  color: #ffffff;
+  padding-left: 5px;
+  
+}
+
+.curve5{
+  border-radius: 5px;
 }
 
 .lightgrey{

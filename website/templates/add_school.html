@@ -33,21 +33,23 @@
 
 
         <section>
-            Here you can add a new School
+
             <div class="inner">
+                <h5 class="h5_white_on_grey">Add a School</h5></br>
+                Here you can add a new School to the system</br></br>
                 
                 <div class="form-row form-group">
                     <div class="form-holder">
-                        <label for="school_name">School Name</label>
-                        {{ form.school_name(size=32) }}<br>
+                        <label for="school_name">School:</label>
+                        {{ form.school_name(size=32, class="form-control", placeholder="School Name") }}<br>
                         {% for error in form.school_name.errors %}
-                            <span style="color: red;">{{ error }}</span><br>
+                            <span style="color: #8e1537;">{{ error }}</span><br>
                         {% endfor %}
                     </div>
                 </div>
                 <div class="form-row form-group">
                     <div class="form-holder">
-                        <button type="submit" class="sl-button" style="margin-top: 20px;">submit</button>
+                        <button type="submit" class="btn green-btn" style="margin-top: 20px;">submit</button>
                     </div>
                 </div>
             </div>

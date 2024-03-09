@@ -33,21 +33,25 @@
 
 
         <section>
-            Here you can add a new category to rate a player on
+
+
+            
             <div class="inner">
+                <h5 class="h5_white_on_grey">Category Description</h5></br>
+                Here you can add a new category to rate a player on</br></br>
                 
                 <div class="form-row form-group">
                     <div class="form-holder">
-                        <label for="category_description">Category Description</label>
-                        {{ form.category_description(size=32) }}<br>
+                        <label for="category_description">Category:</label>
+                        {{ form.category_description(size=32, class="form-control", placeholder="Category") }}<br>
                         {% for error in form.category_description.errors %}
-                            <span style="color: red;">{{ error }}</span><br>
+                            <span style="color: #8e1537;">{{ error }}</span><br>
                         {% endfor %}
                     </div>
                 </div>
                 <div class="form-row form-group">
                     <div class="form-holder">
-                        <button type="submit" class="sl-button" style="margin-top: 20px;">submit</button>
+                        <button type="submit" class="btn green-btn" style="margin-top: 20px;">submit</button>
                     </div>
                 </div>
             </div>

@@ -21,7 +21,7 @@ views = Blueprint("views", __name__)
 @login_required
 def home():
     # Check the user's role and pass it to the template
-    role = session.get('role', 'Player')  # Default to 'Player' if not set
+    # role = session.get('role', 'Player')  # Default to 'Player' if not set
 
     #here the user variable stores the current user which if it exists i.e.
     # you are logged in, is an object containing the users record
@@ -33,6 +33,13 @@ def home():
         # return render_template("playerdash.html", user=current_user)
     elif current_user.is_authenticated and current_user.Role == 'Coach':
         return render_template("coachdash.html", user=current_user)
+
+
+
+@views.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    return render_template('settings.html', user=current_user)
 
 
 

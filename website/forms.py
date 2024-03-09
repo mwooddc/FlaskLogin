@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms.validators import InputRequired, DataRequired, NumberRange, ValidationError
+from flask import flash
+from wtforms.validators import InputRequired, DataRequired, NumberRange, ValidationError, Length
 from wtforms import SelectField, StringField, SubmitField, IntegerField, TextAreaField
 from .models import User, RatingCategory
 
@@ -16,8 +17,15 @@ class UserRatingForm(FlaskForm):
         self.rating_category.choices = [(category.CategoryCode, category.CategoryDescription) for category in RatingCategory.query.all()]
 
 class RatingCategoryForm(FlaskForm):
-    category_description = StringField('Category Description', validators=[DataRequired()])
+    category_description = StringField('Category Description', validators=[
+        DataRequired()])
+    #     Length(min=3, message='The field must contain at least 3 characters.')
+    # ])
     submit = SubmitField('Submit')
+    def validate_category_description(form, field):
+        if len(field.data) < 3:
+            flash('The category description must contain at least 3 characters.', 'error')
+            raise ValidationError('The category description must contain at least 3 characters.')
 
 
 class AddSchoolForm(FlaskForm):
