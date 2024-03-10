@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import IntegerField
-from wtforms.validators import InputRequired, NumberRange
-from wtforms import SelectField
+from flask import flash
+from wtforms.validators import InputRequired, DataRequired, NumberRange, ValidationError, Length
+from wtforms import SelectField, StringField, SubmitField, IntegerField, TextAreaField
 from .models import User, RatingCategory
 
 class UserRatingForm(FlaskForm):
@@ -16,8 +16,67 @@ class UserRatingForm(FlaskForm):
         # Populate the rating category dropdown list with category names
         self.rating_category.choices = [(category.CategoryCode, category.CategoryDescription) for category in RatingCategory.query.all()]
 
-# class UserRatingForm(FlaskForm):
-#     rater_id = IntegerField('Rater ID', validators=[InputRequired()])
-#     ratee_id = IntegerField('Ratee ID', validators=[InputRequired()])
-#     rating_category = IntegerField('Rating Category', validators=[InputRequired()])
-#     value = IntegerField('Value', validators=[InputRequired()])
+class RatingCategoryForm(FlaskForm):
+    category_description = StringField('Category Description', validators=[
+        DataRequired()])
+    #     Length(min=3, message='The field must contain at least 3 characters.')
+    # ])
+    submit = SubmitField('Submit')
+    def validate_category_description(form, field):
+        if len(field.data) < 3:
+            flash('The category description must contain at least 3 characters.', 'error')
+            raise ValidationError('The category description must contain at least 3 characters.')
+
+
+class AddSchoolForm(FlaskForm):
+    school_name = StringField('School Name', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+
+# class TennisEventForm(FlaskForm):
+#     date = StringField('Date', validators=[InputRequired()])
+#     home_venue = SelectField('Home Venue', coerce=int, validators=[InputRequired()])
+#     away_venue = SelectField('Away Venue', coerce=int, validators=[InputRequired()])
+
+# class MatchForm(FlaskForm):
+#     player1_name = SelectField('Player 1')
+#     player2_name = SelectField('Player 2')
+#     singles_or_doubles = SelectField('Singles or Doubles')
+#     sets_played = IntegerField('Sets Played', validators=[InputRequired()])
+#     sets_won = IntegerField('Sets Won', validators=[InputRequired()])
+#     outcome = SelectField('Outcome')
+#     comment = StringField('Comment')
+
+class TennisEventForm(FlaskForm):
+    date = StringField('Date', validators=[InputRequired()])
+    home_venue = StringField('Home Venue', validators=[InputRequired()])
+    away_venue = StringField('Away Venue', validators=[InputRequired()])
+
+class MatchForm(FlaskForm):
+    player1_name_0 = SelectField('Player 1')
+    # player2_name = SelectField('Player 2')
+    player2_name_0 = SelectField('Player 2', choices=[('', 'None')])  # Assuming you've populated the rest of the choices elsewhere
+    singles_or_doubles_0 = SelectField(
+        'Singles or Doubles',
+        choices=[('Singles', 'Singles'), ('Doubles', 'Doubles')],
+        validators=[DataRequired()]
+    )
+    sets_played_0 = IntegerField('Sets Played', validators=[InputRequired()])
+    sets_won_0 = IntegerField('Sets Won', validators=[InputRequired()])
+    won_or_lost_0 = SelectField(
+        'Won or Lost',
+        choices=[('Won', 'Won'), ('Lost', 'Lost')],
+        validators=[DataRequired()]
+    )
+    comment_0 = TextAreaField('Comment', render_kw={'rows': 4, 'cols': 50})
+
+    def validate_player1_name_0(form, field):
+        if field.data == 'None':
+            raise ValidationError("Player 1 can not be set to None.")
+
+    def validate_player2_name_0(form, field):
+        print("Test",form.singles_or_doubles_0.data)
+        if form.singles_or_doubles_0.data == 'Singles' and field.data != 'None':
+            raise ValidationError("For Singles, 'None' must be selected for Player 2.")
+        elif form.singles_or_doubles_0.data == 'Doubles' and field.data == 'None':
+            raise ValidationError("For Doubles, 'None' can NOT be selected for Player 2.")

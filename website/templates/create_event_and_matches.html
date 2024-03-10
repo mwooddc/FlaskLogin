@@ -1,0 +1,135 @@
+{% extends "base.html" %} {% block title %}Sign Up{% endblock %} {% block
+    content %}
+
+    <script src="{{url_for('static', filename='js/match_form.js') }}"></script>
+    <!-- Using a script tag with a non-JavaScript type to hide the players json in
+    which I can then access from an external javascript file -->
+    <script type="application/json" id="players">
+        {{ (players or [])|tojson }}
+    </script>
+
+
+    
+    
+</head>
+<body style="background-image: none;" class="light-mode">
+
+
+
+    
+    <form method="POST" action="{{ url_for('coach.create_event_and_matches') }}">
+        <h1 class="white_on_grey">Create An Event</h1>
+
+        <div class="container">
+            <div class="row form-group lightgrey padding_top_10">
+                <div class="col-12 col-md-2">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" name="date" class="form-control" required>
+                </div>
+                <div class="col-12 col-md-2">
+                    <label for="home_venue">Home School:</label>
+                    <select id="home_venue" name="home_venue" class="form-control" required>
+                        {% for school in schools %}
+                        <option value="{{ school.id }}">{{ school.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-2">
+                    <label for="away_venue">Away School:</label>
+                    <select id="away_venue" name="away_venue" class="form-control" required>
+                        {% for school in schools %}
+                        <option value="{{ school.id }}">{{ school.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    
+            <h1 class="white_on_grey">Create A Match</h1>
+    
+            <div id="match-fields">
+                {% if event is defined and 'matches' in event %}
+                    {% for match in event['matches'] %}
+                        <div class="match-entry form-group lightgrey padding_top_10" id="match{{ loop.index0 }}">
+                            <div class="row">
+                                <div class="col-12 col-md-4">
+                                    Player 1 Name:
+                                    <select name="match[{{ loop.index0 }}][player1_name]" class="form-control" required>
+                                        {% for user_id, user_name in players.items() %}
+                                        <option value="{{ user_id }}" {% if match['player1_name']|string == user_id %}selected{% endif %}>
+                                            {{ user_name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    Player 2 Name:
+                                    <select name="match[{{ loop.index0 }}][player2_name]" class="form-control" required>
+                                        {% for user_id, user_name in players.items() %}
+                                        <option value="{{ user_id }}" {% if match['player2_name']|string == user_id %}selected{% endif %}>
+                                            {{ user_name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    Singles or Doubles:
+                                    <select name="match[{{ loop.index0 }}][singles_or_doubles]" class="form-control" required>
+                                        <option value="Singles" {% if match['singles_or_doubles'] == 'Singles' %}selected{% endif %}>Singles</option>
+                                        <option value="Doubles" {% if match['singles_or_doubles'] == 'Doubles' %}selected{% endif %}>Doubles</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    Sets Played:
+                                    <input type="number" name="match[{{ loop.index0 }}][sets_played]" class="form-control" placeholder="Sets Played" value="{{ match['sets_played'] }}" min="1" required>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    Sets Won:
+                                    <input type="number" name="match[{{ loop.index0 }}][sets_won]" class="form-control" placeholder="Sets Won" value="{{ match['sets_won'] }}" min="0" required>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    Won or Lost:
+                                    <select name="match[{{ loop.index0 }}][won_or_lost]" class="form-control" required>
+                                        <option value="Won" {% if match['won_or_lost'] == 'Won' %}selected{% endif %}>Won</option>
+                                        <option value="Lost" {% if match['won_or_lost'] == 'Lost' %}selected{% endif %}>Lost</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    Comment:
+                                    <textarea name="match[{{ loop.index0 }}][comment]" class="form-control" placeholder="Comment">{{ match['comment'] }}</textarea>
+                                </div>
+                            
+
+                                <div class="row form-group">
+                                    <div class="col-12">
+                                        <button type="button" class="btn maroon-btn" onclick="remove_match('match{{ loop.index0 }}')">Remove Match</button>
+                                    </div>
+                                </div>
+
+                        </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            </br>
+    
+            <div class="row form-group">
+                <div class="col-12">
+                    <button type="button" class="btn pink-btn" onclick="addMatch()">Add Match</button>
+                    <input type="submit" class="btn green-btn" value="Submit">
+                    
+                </div>
+            </div>
+        </div>
+    </form>
+    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPlayersData();
+        });
+        </script>
+    
+
+{% endblock %}

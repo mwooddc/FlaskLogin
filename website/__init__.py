@@ -4,6 +4,7 @@ from os import path
 from flask_login import LoginManager
 
 
+
 db = SQLAlchemy()
 DB_NAME = "database.db"
 
@@ -60,7 +61,5 @@ def create_app():
 #     if not path.exists("website/" + DB_NAME):
 #         db.create_all()
 #         print("Created database!")
-
-
 
 
