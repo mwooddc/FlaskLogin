@@ -1,0 +1,53 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} 
+{% block content%} 
+<body style="background-image: none;" class="light-mode">
+
+
+<style>
+    /* Adjust line height for form elements */
+    .form-holder select,
+    .form-holder input[type="text"],
+    .form-holder input[type="password"],
+    .form-holder input[type="number"] {
+        line-height: 1; /* Adjust the line height as needed */
+    }
+
+    /* Add dropdown arrow to select elements */
+    .form-holder select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23767676" width="18px" height="18px"><path d="M7 10l5 5 5-5z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        padding-right: 30px; /* Adjust the padding to leave space for the arrow */
+        min-width: 200px; /* Adjust as needed */
+        width: 100%; /* Allow fields to expand to fill available space */
+    }
+</style>
+    <form method="POST" action="#" class="wrapper">
+        <section>            
+            <div class="inner">
+                <h5 class="h5_white_on_grey">Profile</h5></br>
+                Here you are able to update your user profile and check your role within the application. </br></br>
+               
+                <div class="form-row form-group">
+                    <div class="form-holder">
+                        <h6>You are logged in as:</h6> {{ current_user.Username }} </br>
+                        <h6>Your Email Address is:</h6> {{ current_user.Email }} </br>
+                        <h6>Your Forename is:</h6> {{ current_user.Forename }} </br>
+                        <h6>Your Surname is:</h6> {{ current_user.Surname }} </br>
+                        <h6>You Role is:</h6> {{ current_user.Role }} </br>
+                    </div>
+                </div>
+                <div class="form-row form-group">
+                    <div class="form-holder">
+                        <button type="submit" class="btn green-btn" style="margin-top: 20px;">Update</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </form>
+
+
+{% endblock %}

@@ -8,13 +8,26 @@
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Profile Details</h5>
+          <h5 class="card-title">Notifications</h5>
 
-          <h6>You are logged in as:</h6> {{ current_user.Username }} </br>
-          <h6>Your Email Address is:</h6> {{ current_user.Email }} </br>
-          <h6>Your Forename is:</h6> {{ current_user.Forename }} </br>
-          <h6>Your Surname is:</h6> {{ current_user.Surname }} </br>
-          <h6>You Role is:</h6> {{ current_user.Role }} </br>
+            <table id="notificationsTable" class="table table-striped" style="width:100%">
+              <thead>
+                  <tr>
+                      <th>Date</th>
+                      <th>Comment</th>
+                      <th>View</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for notification in user_notifications %}
+                  <tr>
+                      <td>{{ notification.timestamp.strftime('%d-%m-%Y') }}</td>
+                      <td>{{ notification.comment }}</td>
+                      <td><button type="button" class="btn pink-btn btn-notifications" onclick="#">more</button></td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -101,13 +114,11 @@
   });
 </script>
 
-
-
-
-
-
-
-
+<script>
+  $(document).ready( function () {
+      $('#notificationsTable').DataTable();
+  } );
+  </script>
 
 
 {% endblock %}
