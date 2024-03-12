@@ -44,10 +44,6 @@ class User(db.Model, UserMixin):
                                     lazy='dynamic')
 
 
-
-
-
-
 class Match(db.Model, UserMixin):
     __tablename__ = 'matches'
     id = db.Column(db.Integer, primary_key=True)
@@ -63,6 +59,21 @@ class Match(db.Model, UserMixin):
 
     player1 = db.relationship('User', foreign_keys=[player1_id], backref='matches_as_player1')
     player2 = db.relationship('User', foreign_keys=[player2_id], backref='matches_as_player2')
+
+
+class Notification(db.Model, UserMixin):
+    __tablename__ = 'notifications'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    match_id = db.Column(db.Integer, db.ForeignKey('matches.id'), nullable=False)
+    comment = db.Column(db.Text, nullable=False)  # You might store the comment text or an identifier
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
+    timestamp = db.Column(db.DateTime(timezone=True), default=func.now())
+
+    user = db.relationship('User', backref='notifications')
+    match = db.relationship('Match', backref='notifications')
+
+
 
 
 class School(db.Model, UserMixin):

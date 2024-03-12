@@ -42,6 +42,12 @@ def settings():
     return render_template('settings.html', user=current_user)
 
 
+@views.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    return render_template('profile.html', user=current_user)
+
+
 
 #######################################################
 ###### ROUTES TO POPULATE THE DATABASE WITH DATA ######
@@ -113,7 +119,9 @@ def populate_users():
 
     set_users =[
         ["player@player.com","player","player123","player","player","Player"],
-        ["coach@coach.com","coach","coach123","coach","coach","Coach"]
+        ["coach@coach.com","coach","coach123","coach","coach","Coach"],
+        ["player2@player2.com","player2","player2123","player2","player2","Player"],
+        ["sam@sam.com","sam","sam123","sam","smith","Player"]
     ]
     for i in range(len(set_users)):
         email = set_users[i][0]

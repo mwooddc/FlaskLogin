@@ -6,7 +6,7 @@ from collections import defaultdict
 # from sqlalchemy.sql import func
 from datetime import datetime
 
-from .models import db, UserRatings, RatingCategory  # Adjust the import as per your project structure
+from .models import db, UserRatings, RatingCategory, Notification  # Adjust the import as per your project structure
 
 
 #A Blueprint simply allows you to create seperate files from the standard app.py
@@ -16,6 +16,28 @@ from .models import db, UserRatings, RatingCategory  # Adjust the import as per 
 #You then assign that blueprint to a variable and then use that 
 #as the @route in this code (see lines 13 and 14)
 player = Blueprint("player", __name__)
+
+def get_user_notifications(user_id):
+    notifications = Notification.query.filter_by(user_id=user_id, is_read=False).all()
+    # # Option 1: Return a list of comments/messages
+    # comments = [notification.comment for notification in notifications]
+    # return comments
+
+    # Option 2: Return a list of dictionaries with more details
+    detailed_notifications = [{
+        'id': notification.id,
+        'comment': notification.comment,
+        'match_id': notification.match_id,
+        'is_read': notification.is_read,
+        'timestamp': notification.timestamp
+    } for notification in notifications]
+    return detailed_notifications
+
+def mark_notification_as_read(notification_id):
+    notification = Notification.query.get(notification_id)
+    if notification:
+        notification.is_read = True
+        db.session.commit()
 
 
 # @views.route("/")
@@ -53,6 +75,8 @@ def mates():
 @role_required('Player')
 def playerdashboard():
     role = session.get('role', 'Player')  # Default to 'Player' if not set
+
+    user_notifications = get_user_notifications(current_user.id)
 
     # Query to fetch the ratings, their categories, and dates for the current user
     ratings_query = db.session.query(UserRatings.Value, UserRatings.date_created, RatingCategory.CategoryDescription)\
@@ -121,7 +145,7 @@ def playerdashboard():
 
 
 
-    return render_template('playerdash.html', ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, final_data=final_data, categories=categories, user=current_user)
+    return render_template('playerdash.html', ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, final_data=final_data, categories=categories, user_notifications=user_notifications, user=current_user)
 
 
 

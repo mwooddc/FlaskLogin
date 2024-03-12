@@ -22,7 +22,9 @@ body.dark-mode {
 }
 
 
-
+.btn-notifications{
+  padding:0rem 0.75rem;
+}
 .background_grey {
   background-color: #353f4c;
 }
