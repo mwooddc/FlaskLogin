@@ -64,15 +64,17 @@ class Match(db.Model, UserMixin):
 class Notification(db.Model, UserMixin):
     __tablename__ = 'notifications'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Recipient
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Sender
     match_id = db.Column(db.Integer, db.ForeignKey('matches.id'), nullable=False)
-    comment = db.Column(db.Text, nullable=False)  # You might store the comment text or an identifier
+    comment = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False, nullable=False)
     timestamp = db.Column(db.DateTime(timezone=True), default=func.now())
 
-    user = db.relationship('User', backref='notifications')
+    # Relationships
+    receiver = db.relationship('User', foreign_keys=[receiver_id], backref='notifications_received')
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='notifications_sent')
     match = db.relationship('Match', backref='notifications')
-
 
 
 

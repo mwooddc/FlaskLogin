@@ -18,7 +18,7 @@ from .models import db, UserRatings, RatingCategory, Notification  # Adjust the 
 player = Blueprint("player", __name__)
 
 def get_user_notifications(user_id):
-    notifications = Notification.query.filter_by(user_id=user_id, is_read=False).all()
+    notifications = Notification.query.filter_by(receiver_id=user_id, is_read=False).all()
     # # Option 1: Return a list of comments/messages
     # comments = [notification.comment for notification in notifications]
     # return comments
@@ -28,6 +28,7 @@ def get_user_notifications(user_id):
         'id': notification.id,
         'comment': notification.comment,
         'match_id': notification.match_id,
+        'sender_id': notification.sender_id,  # Include sender_id if you want to show who sent the notification
         'is_read': notification.is_read,
         'timestamp': notification.timestamp
     } for notification in notifications]
@@ -53,21 +54,6 @@ def mates():
     # we can then inside home.html use jinja to access the users fields
     #e.g. id, username, email {{ current_user.username }}
     return render_template("player.html", user=current_user)
-
-
-# @player.route('/playerdashboard')
-# @login_required
-# @role_required('Player')
-# def playerdashboard():
-#     role = session.get('role', 'Player')  # Default to 'Player' if not set
-#     # Query to fetch the ratings and their categories for the current user
-#     ratings_query = db.session.query(UserRatings, RatingCategory).join(RatingCategory).filter(UserRatings.Rateeid == current_user.id).all()
-#     # Process the query results
-#     categories = [category.CategoryDescription for _, category in ratings_query]
-#     ratings = [rating.Value for rating, _ in ratings_query]
-#     return render_template('playerdash.html', ratings_query=ratings_query, ratings=ratings, categories=categories,user=current_user)
-
-
 
 
 @player.route('/playerdashboard')
@@ -111,16 +97,16 @@ def playerdashboard():
         datasets.append({
             'Category': category,
             'Value': details['values'],
-            'Date': details['dates'],  # You'll use this to ensure all datasets have the same x-axis labels
+            'Date': details['dates'],  # use this to ensure all datasets have the same x-axis labels
             # Add more customization for each line here (e.g., backgroundColor, borderColor)
         })
 
     
-    # Step 1: Determine all unique dates
+    # Determine all unique dates
     unique_dates = sorted(set(date for entry in datasets for date in entry['Date']))
 
-    # Step 2: Adjust values for each category
-    final_data = []
+    # Adjust values for each category
+    players_rating_data = []
     for entry in datasets:
         category = entry['Category']
         values = entry['Value']
@@ -140,43 +126,7 @@ def playerdashboard():
                 adjusted_values.append(last_value or 0)  # Repeat last value if available, otherwise use 0
 
         # Append to the final data structure
-        final_data.append({'Category': category, 'Value': adjusted_values, 'Date': unique_dates})
+        players_rating_data.append({'Category': category, 'Value': adjusted_values, 'Date': unique_dates})
 
+    return render_template('playerdash.html', ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, players_rating_data=players_rating_data, categories=categories, user_notifications=user_notifications, user=current_user)
 
-
-
-    return render_template('playerdash.html', ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, final_data=final_data, categories=categories, user_notifications=user_notifications, user=current_user)
-
-
-
-
-# @player.route('/playerdashboard')
-# @login_required
-# @role_required('Player')
-# def playerdashboard():
-#     role = session.get('role', 'Player')  # Default to 'Player' if not set
-
-#     # Query to fetch the ratings, their categories, and dates for the current user
-#     ratings_query = db.session.query(UserRatings.Value, UserRatings.date_created, RatingCategory.CategoryDescription)\
-#         .join(RatingCategory)\
-#         .filter(UserRatings.Rateeid == current_user.id)\
-#         .order_by(UserRatings.date_created.asc()).all()
-
-#     # Organize data for plotting
-#     data_for_plot = defaultdict(lambda: defaultdict(list))
-#     for value, date_created, category_description in ratings_query:
-#         data_for_plot[category_description]['dates'].append(date_created.strftime('%Y-%m-%d'))  # Format date as string
-#         data_for_plot[category_description]['values'].append(value)
-
-#     # Prepare data for Chart.js
-#     categories = list(data_for_plot.keys())
-#     datasets = []
-#     for category, details in data_for_plot.items():
-#         datasets.append({
-#             'label': category,
-#             'data': details['values'],
-#             'dates': details['dates'],  # You'll use this to ensure all datasets have the same x-axis labels
-#             # Add more customization for each line here (e.g., backgroundColor, borderColor)
-#         })
-
-#     return render_template('playerdash.html', datasets=datasets, categories=categories, user=current_user)

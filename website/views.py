@@ -75,6 +75,66 @@ def populate_categories():
 
 
 
+
+@views.route("/")
+@views.route("/populate_schools")
+# Predefined category descriptions
+def populate_schools():
+    schools = [
+        "Charter House", "Epsom", "Sevenoaks", "Harrow", "Tonbridge", "Eton", "Wellington","Cranleigh"
+    ]
+
+    for code, school in enumerate(schools, start=1):
+        new_school = School(id=code, name=school)
+        db.session.add(new_school)
+    db.session.commit()
+
+    flash('Database populated successfully!', 'success')
+    return redirect(url_for('views.home'))  # Redirect to another route (e.g., index)
+
+
+
+
+
+
+@views.route("/")
+@views.route("/populate_player_ratings")
+# Predefined category descriptions
+def populate_player_ratings():
+    player_ratings =[
+        [2,4,1,5,"2024-03-05"],
+        [2,4,2,3,"2024-03-05"],
+        [2,4,3,6,"2024-03-05"],
+        [2,4,4,2,"2024-03-05"],
+        [2,4,5,8,"2024-03-07"],
+        [2,4,6,5,"2024-03-07"],
+        [2,4,1,7,"2024-03-07"],
+        [2,4,2,5,"2024-03-07"],
+        [2,4,7,7,"2024-03-08"],
+        [2,4,3,3,"2024-03-10"],
+        [2,4,4,4,"2024-03-12"]
+    ]
+    for i in range(len(player_ratings)):
+        Raterid = player_ratings[i][0]
+        Rateeid = player_ratings[i][1]
+        RatingCategory = player_ratings[i][2]
+        Value = player_ratings[i][3]
+        date_created_string = player_ratings[i][4]
+        # convert a string date into an SQLite recognised data type
+        date_created = datetime.strptime(date_created_string, "%Y-%m-%d")
+
+        rating = UserRatings(Raterid=Raterid, Rateeid=Rateeid, RatingCategory=RatingCategory,
+                    Value=Value, date_created=date_created)
+        db.session.add(rating)
+
+    db.session.commit()
+
+    flash('Database populated successfully with new player ratings!', 'success')
+    return redirect(url_for('views.home'))  # Redirect to another route (e.g., index)
+
+
+
+
 @views.route("/")
 @views.route("/populate_users")
 # Predefined category descriptions

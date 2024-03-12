@@ -22,8 +22,8 @@
                   {% for notification in user_notifications %}
                   <tr>
                       <td>{{ notification.timestamp.strftime('%d-%m-%Y') }}</td>
-                      <td>{{ notification.comment }}</td>
-                      <td><button type="button" class="btn pink-btn btn-notifications" onclick="#">more</button></td>
+                      <td>{{ notification.comment[:25] + '...' if notification.comment|length > 25 else notification.comment }}</td>
+                      <td><button type="button" class="btn pink-btn btn-notifications" onclick="#">view</button></td>
                   </tr>
                   {% endfor %}
               </tbody>
@@ -38,7 +38,7 @@
           <h5 class="card-title">Coach Ratings Over Time</h5>
           <!-- Check these for testing purposes
           {{datasets}}<br/><br/>
-          {{final_data}}<br/><br/>
+          {{players_rating_data}}<br/><br/>
           {{categories}}<br/><br/>
           {{ratings_query}} -->
           
@@ -77,12 +77,12 @@
 
 
 <script>
-  // Python data structure (final_data) passed from the server
-  // const final_data = {{final_data}}
-  const final_data = {{ final_data | tojson | safe }};
-  // Extracting data from final_data
-  const labels = final_data[0].Date;
-  const datasets = final_data.map(entry => ({
+  // Python data structure (players_rating_data) passed from the server
+  // const players_rating_data = {{players_rating_data}}
+  const players_rating_data = {{ players_rating_data | tojson | safe }};
+  // Extracting data from players_rating_data
+  const labels = players_rating_data[0].Date;
+  const datasets = players_rating_data.map(entry => ({
       label: entry.Category,
       data: entry.Value,
       fill: false,

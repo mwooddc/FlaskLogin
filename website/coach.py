@@ -217,13 +217,15 @@ def create_event_and_matches():
                 if match_data['comment'].strip():  # Check if comment is not just whitespace
                     for player_id in [match.player1_id, match.player2_id]:
                         # Ensure player_id is valid and not None before creating a notification
-                        if player_id:  # player_id should already be an integer, but ensure it's not None
+                        if player_id and player_id != current_user.id:  # Ensure the player is not the sender
                             notification = Notification(
-                                user_id=player_id,
-                                match_id=match.id,  # Now match.id is available
+                                receiver_id=player_id,
+                                sender_id=current_user.id,  # Current logged-in user as the sender
+                                match_id=match.id,
                                 comment=match_data['comment'],
                                 is_read=False
-                            )
+                            )                        
+
                             db.session.add(notification)
 
 
