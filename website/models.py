@@ -66,7 +66,7 @@ class Notification(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     receiver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Recipient
     sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Sender
-    match_id = db.Column(db.Integer, db.ForeignKey('matches.id'), nullable=False)
+    match_id = db.Column(db.Integer, db.ForeignKey('matches.id'), nullable=True)
     comment = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False, nullable=False)
     timestamp = db.Column(db.DateTime(timezone=True), default=func.now())

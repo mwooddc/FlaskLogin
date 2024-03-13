@@ -23,8 +23,8 @@
                   <tr>
                       <td>{{ notification.timestamp.strftime('%d-%m-%Y') }}</td>
                       <td>{{ notification.comment[:25] + '...' if notification.comment|length > 25 else notification.comment }}</td>
-                      <td><button type="button" class="btn pink-btn btn-notifications" onclick="#">view</button></td>
-                  </tr>
+                      <td><button type="button" class="btn pink-btn btn-notifications" data-notification-id="{{ notification.id }}" data-sender-id="{{ notification.sender_id }}" data-message="{{ notification.comment }}" onclick="openModal(this)">View</button></td>
+                    </tr>
                   {% endfor %}
               </tbody>
           </table>
@@ -36,7 +36,8 @@
         <div class="card-body">
           <!-- <h5 class="card-title">Player ratings for: {{ current_user.Forename }}</h5> -->
           <h5 class="card-title">Coach Ratings Over Time</h5>
-          <!-- Check these for testing purposes
+          <!-- Check these for testing purposes<br/><br/>
+          {{user_notifications}}<br/><br/>
           {{datasets}}<br/><br/>
           {{players_rating_data}}<br/><br/>
           {{categories}}<br/><br/>
@@ -73,6 +74,17 @@
     </div>
   </div>
 </div>
+
+
+<sl-dialog id="replyModal" label="Notification Details">
+  <p id="notificationMessage"></p></br></br>
+  <form id="replyForm" method="POST" action="{{ url_for('player.reply_to_notification') }}">
+    <input type="hidden" name="original_notification_id" id="originalNotificationId">
+    <input type="hidden" name="receiver_id" id="receiverId">
+    <sl-textarea name="reply_message" placeholder="Your reply..."></sl-textarea></br>
+    <button type="button" class="btn pink-btn btn-notifications">Send Reply</button>
+  </form>
+</sl-dialog>
 
 
 
@@ -118,7 +130,23 @@
   $(document).ready( function () {
       $('#notificationsTable').DataTable();
   } );
-  </script>
+</script>
+
+
+<script>
+  function openModal(button) {
+    const notificationId = button.getAttribute('data-notification-id');
+    const senderId = button.getAttribute('data-sender-id');
+    const message = button.getAttribute('data-message'); // Ensure you add this data attribute if you want to show the message
+  
+    document.getElementById('notificationMessage').textContent = message;
+    document.getElementById('originalNotificationId').value = notificationId;
+    document.getElementById('receiverId').value = senderId;
+  
+    document.querySelector('#replyModal').show();
+  }
+</script>
+  
 
 
 {% endblock %}

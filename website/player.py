@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session
+from flask import Blueprint, render_template, session, request, redirect, url_for
 from flask_login import login_required, current_user
 from .auth import role_required
 from collections import defaultdict
@@ -130,3 +130,33 @@ def playerdashboard():
 
     return render_template('playerdash.html', ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, players_rating_data=players_rating_data, categories=categories, user_notifications=user_notifications, user=current_user)
 
+
+
+
+
+
+
+@player.route('/reply_to_notification', methods=['POST'])
+@login_required
+@role_required('Player')
+def reply_to_notification():
+    original_notification_id = request.form.get('original_notification_id')
+    receiver_id = request.form.get('receiver_id')
+    reply_message = request.form.get('reply_message')
+
+    # Mark the original notification as read
+    original_notification = Notification.query.get(original_notification_id)
+    if original_notification:
+        original_notification.is_read = True
+
+    # Create the reply notification
+    reply_notification = Notification(
+        receiver_id=receiver_id,
+        sender_id=current_user.id,  # Assuming you have access to the currently logged-in user's ID
+        comment=reply_message,
+        is_read=False
+    )
+    db.session.add(reply_notification)
+    db.session.commit()
+
+    return redirect(url_for('player.playerdashboard'))  # Redirect to the notifications page or wherever appropriate
