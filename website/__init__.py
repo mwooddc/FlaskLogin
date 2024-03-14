@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
@@ -16,6 +17,7 @@ def create_app():
     # Note we use flask_login to manage sessions but still need this secret key
     app.config['SECRET_KEY'] = "helloworld"
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    csrf = CSRFProtect(app)
     db.init_app(app)
 
     #see files auth.py and views.py for explanation and video link to why blueprints are used

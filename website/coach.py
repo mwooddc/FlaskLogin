@@ -17,19 +17,102 @@ import re
 coach = Blueprint("coach", __name__)
 
 
-# @views.route("/")
-@coach.route("/coach")
+############# HANDLING NOTIFICATIONS ##############################################################
+
+def get_user_notifications(user_id):
+    notifications = Notification.query.filter_by(receiver_id=user_id, is_read=False).order_by(Notification.timestamp.desc()).limit(5).all()
+    # # Option 1: Return a list of comments/messages
+    # comments = [notification.comment for notification in notifications]
+    # return comments
+
+    # Option 2: Return a list of dictionaries with more details
+    detailed_notifications = [{
+        'id': notification.id,
+        'comment': notification.comment,
+        'match_id': notification.match_id,
+        'sender_id': notification.sender_id,  # Include sender_id if you want to show who sent the notification
+        'sender_name': f"{notification.sender.Forename} {notification.sender.Surname}",  # Access sender's name via relationship
+        'is_read': notification.is_read,
+        'timestamp': notification.timestamp
+    } for notification in notifications]
+    return detailed_notifications
+
+
+
+
+@coach.route('/mark-notifications-read/<int:notification_id>', methods=['POST'])
 @login_required
 @role_required('Coach')
-def mates():
-    # Check the user's role and pass it to the template
-    role = session.get('role', 'Coach')  # Default to 'Player' if not set
+def mark_notifications_read(notification_id):
+    notification = Notification.query.get(notification_id)
+    if notification and notification.receiver_id == current_user.id:  # Check that the notification exists and belongs to the current user
+        notification.is_read = True
+        db.session.commit()
+        return jsonify({"success": True}), 200
+    return jsonify({"error": "Notification not found or access denied"}), 404
 
-    #here the user variable stores the current user which if it exists i.e.
-    # you are logged in, is an object containing the users record
-    # we can then inside home.html use jinja to access the users fields
-    #e.g. id, username, email {{ current_user.username }}
-    return render_template("coach.html", user=current_user)
+
+
+#This route can not be the same name as the route in the player.py
+@coach.route('/reply_to_notifications', methods=['POST'])
+@login_required
+@role_required('Coach')
+def reply_to_notifications():
+    original_notification_id = request.form.get('original_notification_id')
+    receiver_id = request.form.get('receiver_id')
+    reply_message = request.form.get('reply_message')
+
+    # Mark the original notification as read
+    original_notification = Notification.query.get(original_notification_id)
+    if original_notification:
+        original_notification.is_read = True
+
+    # Create the reply notification
+    reply_notification = Notification(
+        receiver_id=receiver_id,
+        sender_id=current_user.id,  # Assuming you have access to the currently logged-in user's ID
+        comment=reply_message,
+        is_read=False
+    )
+    db.session.add(reply_notification)
+    db.session.commit()
+
+    return redirect(url_for('coach.coachdashboard'))  # Redirect to the notifications page or wherever appropriate
+
+
+
+############# HANDLING NOTIFICATIONS FINISHED #####################################################
+###################################################################################################
+
+
+
+
+@coach.route('/coachdashboard', methods=['GET', 'POST'])
+@login_required
+@role_required('Coach')
+def coachdashboard():
+    print("MADE IT")
+    user_notifications = get_user_notifications(current_user.id)
+    return render_template('coachdash.html', user_notifications=user_notifications, user=current_user)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @coach.route('/submit-rating', methods=['GET', 'POST'])
@@ -238,3 +321,7 @@ def create_event_and_matches():
             # return render_template('create_event_and_matches.html', errors=errors, user=current_user, event=event, schools=schools)
 
     return render_template('create_event_and_matches.html', user=current_user, schools=schools, players=players_dict)
+
+
+
+

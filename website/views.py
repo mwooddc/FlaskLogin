@@ -32,7 +32,7 @@ def home():
         # return redirect(url_for('playerdashboard'))
         # return render_template("playerdash.html", user=current_user)
     elif current_user.is_authenticated and current_user.Role == 'Coach':
-        return render_template("coachdash.html", user=current_user)
+        return redirect(url_for("coach.coachdashboard", user=current_user))
 
 
 

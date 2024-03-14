@@ -1,24 +1,48 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} 
 {% block content%} 
 
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <body style="background-image: none;" class="light-mode">
 
 <!-- Here we use Jinja to get access to the current logged in users object -->
 <div class="container mt-4">
   <div class="row">
+
+    <!-- PANEL TWO -->
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Profile Details</h5>
+          <h5 class="card-title">Notifications</h5>
 
-          <h6>You are logged in as:</h6> {{ current_user.Username }} </br>
-          <h6>Your Email Address is:</h6> {{ current_user.Email }} </br>
-          <h6>Your Forename is:</h6> {{ current_user.Forename }} </br>
-          <h6>Your Surname is:</h6> {{ current_user.Surname }} </br>
-          <h6>You Role is:</h6> {{ current_user.Role }} </br>
+
+          <table id="notificationsTable" class="table table-striped" style="width:100%">
+            <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Sender</th>
+                  <th>Comment</th>
+                  <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for notification in user_notifications %}
+                <tr id="notificationRow_{{ notification.id }}">
+                    <td>{{ notification.timestamp.strftime('%d-%m-%Y') }}</td>
+                    <td>{{ notification['sender_name'] }}</td>
+                    <td>{{ notification.comment[:10] + '...' if notification.comment|length > 10 else notification.comment }}</td>
+                    <td><button type="button" class="btn pink-btn btn-notifications" data-notification-id="{{ notification.id }}" data-sender-id="{{ notification.sender_id }}" data-date="{{ notification.timestamp }}" data-name="{{ notification.sender_name }}" data-message="{{ notification.comment }}" onclick="openModal(this)">View</button></td>
+                  </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
         </div>
       </div>
     </div>
+
+    <!-- PANEL TWO -->
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
@@ -27,6 +51,8 @@
         </div>
       </div>
     </div>
+
+    <!-- PANEL TWO -->
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
@@ -39,7 +65,73 @@
         </div>
       </div>
     </div>
+
+
   </div>
 </div>
+
+
+<!-- MODAL -->
+<sl-dialog id="replyModal" label="Notification Details">
+  <span class="bold-text">Date|Time: </span><span id="notificationDate"></span></br>
+  <span class="bold-text">Sender: </span><span id="notificationSender"></span></br>
+  <span class="bold-text">Message:</span></br><span id="notificationMessage"></span></br></br>
+  <form id="replyForm" method="POST" action="{{ url_for('coach.reply_to_notifications') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="original_notification_id" id="originalNotificationId">
+    <input type="hidden" name="receiver_id" id="receiverId">
+    <sl-textarea name="reply_message" placeholder="Your reply..."></sl-textarea></br>
+    <button type="submit" class="btn pink-btn btn-notifications">Send Reply</button>
+  </form>
+</sl-dialog>
+
+
+<script>
+  $(document).ready( function () {
+      $('#notificationsTable').DataTable();
+  } );
+</script>
+
+
+<script>
+  function openModal(button) {
+    const notificationId = button.getAttribute('data-notification-id');
+    const senderId = button.getAttribute('data-sender-id');
+    const message = button.getAttribute('data-message');
+    const date = button.getAttribute('data-date');
+    const name = button.getAttribute('data-name'); // This assumes you're setting data-name attribute in your button
+
+    // Set the content in your modal
+    document.getElementById('notificationMessage').textContent = message;
+    document.getElementById('notificationDate').textContent = date;
+    document.getElementById('notificationSender').textContent = name;
+    document.getElementById('originalNotificationId').value = notificationId;
+    document.getElementById('receiverId').value = senderId;
+
+    document.querySelector('#replyModal').show();
+
+    // Fetch request to mark the notification as read
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch(`/mark-notifications-read/${notificationId}`, {
+      method: 'POST',
+      headers: {
+        "X-CSRFToken": csrfToken,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({}) // No need to send data, but the server might expect a JSON body
+    })
+    .then(response => {
+      if (response.ok) {
+        console.log("Notification marked as read");
+        //remove row from the table
+        document.getElementById(`notificationRow_${notificationId}`).remove();
+      } else {
+        console.error('Failed to mark notification as read');
+      }
+    });
+  }
+</script>
+
+
 
 {% endblock %}

@@ -7,6 +7,9 @@ Light Pink: #eba3b1
 Green: #158e6c
 */
 
+.bold-text{
+  font-weight: 700;
+}
 
 :root {
   --background-color-light: #FFFFFF; /* White for light mode */

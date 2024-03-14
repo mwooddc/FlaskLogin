@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, request, redirect, url_for
+from flask import Blueprint, render_template, session, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from .auth import role_required
 from collections import defaultdict
@@ -17,8 +17,11 @@ from .models import db, UserRatings, RatingCategory, Notification  # Adjust the 
 #as the @route in this code (see lines 13 and 14)
 player = Blueprint("player", __name__)
 
+
+############# HANDLING NOTIFICATIONS ##############################################################
+
 def get_user_notifications(user_id):
-    notifications = Notification.query.filter_by(receiver_id=user_id, is_read=False).all()
+    notifications = Notification.query.filter_by(receiver_id=user_id, is_read=False).order_by(Notification.timestamp.desc()).limit(5).all()
     # # Option 1: Return a list of comments/messages
     # comments = [notification.comment for notification in notifications]
     # return comments
@@ -29,31 +32,59 @@ def get_user_notifications(user_id):
         'comment': notification.comment,
         'match_id': notification.match_id,
         'sender_id': notification.sender_id,  # Include sender_id if you want to show who sent the notification
+        'sender_name': f"{notification.sender.Forename} {notification.sender.Surname}",  # Access sender's name via relationship
         'is_read': notification.is_read,
         'timestamp': notification.timestamp
     } for notification in notifications]
     return detailed_notifications
 
-def mark_notification_as_read(notification_id):
-    notification = Notification.query.get(notification_id)
-    if notification:
-        notification.is_read = True
-        db.session.commit()
 
 
-# @views.route("/")
-@player.route("/player")
+
+@player.route('/mark-notification-read/<int:notification_id>', methods=['POST'])
 @login_required
 @role_required('Player')
-def mates():
-    # Check the user's role and pass it to the template
-    role = session.get('role', 'Player')  # Default to 'Player' if not set
+def mark_notification_read(notification_id):
+    notification = Notification.query.get(notification_id)
+    if notification and notification.receiver_id == current_user.id:  # Check that the notification exists and belongs to the current user
+        notification.is_read = True
+        db.session.commit()
+        return jsonify({"success": True}), 200
+    return jsonify({"error": "Notification not found or access denied"}), 404
 
-    #here the user variable stores the current user which if it exists i.e.
-    # you are logged in, is an object containing the users record
-    # we can then inside home.html use jinja to access the users fields
-    #e.g. id, username, email {{ current_user.username }}
-    return render_template("player.html", user=current_user)
+
+
+
+@player.route('/reply_to_notification', methods=['POST'])
+@login_required
+@role_required('Player')
+def reply_to_notification():
+    original_notification_id = request.form.get('original_notification_id')
+    receiver_id = request.form.get('receiver_id')
+    reply_message = request.form.get('reply_message')
+
+    # Mark the original notification as read
+    original_notification = Notification.query.get(original_notification_id)
+    if original_notification:
+        original_notification.is_read = True
+
+    # Create the reply notification
+    reply_notification = Notification(
+        receiver_id=receiver_id,
+        sender_id=current_user.id,  # Assuming you have access to the currently logged-in user's ID
+        comment=reply_message,
+        is_read=False
+    )
+    db.session.add(reply_notification)
+    db.session.commit()
+
+    return redirect(url_for('player.playerdashboard'))  # Redirect to the notifications page or wherever appropriate
+
+
+
+############# HANDLING NOTIFICATIONS FINISHED #####################################################
+###################################################################################################
+
 
 
 @player.route('/playerdashboard')
@@ -129,34 +160,3 @@ def playerdashboard():
         players_rating_data.append({'Category': category, 'Value': adjusted_values, 'Date': unique_dates})
 
     return render_template('playerdash.html', ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, players_rating_data=players_rating_data, categories=categories, user_notifications=user_notifications, user=current_user)
-
-
-
-
-
-
-
-@player.route('/reply_to_notification', methods=['POST'])
-@login_required
-@role_required('Player')
-def reply_to_notification():
-    original_notification_id = request.form.get('original_notification_id')
-    receiver_id = request.form.get('receiver_id')
-    reply_message = request.form.get('reply_message')
-
-    # Mark the original notification as read
-    original_notification = Notification.query.get(original_notification_id)
-    if original_notification:
-        original_notification.is_read = True
-
-    # Create the reply notification
-    reply_notification = Notification(
-        receiver_id=receiver_id,
-        sender_id=current_user.id,  # Assuming you have access to the currently logged-in user's ID
-        comment=reply_message,
-        is_read=False
-    )
-    db.session.add(reply_notification)
-    db.session.commit()
-
-    return redirect(url_for('player.playerdashboard'))  # Redirect to the notifications page or wherever appropriate

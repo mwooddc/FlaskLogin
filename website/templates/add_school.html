@@ -28,6 +28,7 @@
 
 
     <form method="POST" action="{{ url_for('coach.add_school') }}" class="wrapper">
+        
         {{ form.csrf_token }}
         {{ form.hidden_tag() }}
 

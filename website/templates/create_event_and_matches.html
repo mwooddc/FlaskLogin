@@ -18,6 +18,7 @@
 
     
     <form method="POST" action="{{ url_for('coach.create_event_and_matches') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <h1 class="white_on_grey">Create An Event</h1>
 
         <div class="container">
@@ -50,6 +51,8 @@
             <div id="match-fields">
                 {% if event is defined and 'matches' in event %}
                     {% for match in event['matches'] %}
+                    {{ form.csrf_token }}
+                    {{ form.hidden_tag() }}
                         <div class="match-entry form-group lightgrey padding_top_10" id="match{{ loop.index0 }}">
                             <div class="row">
                                 <div class="col-12 col-md-4">
