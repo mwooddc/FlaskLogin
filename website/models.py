@@ -92,7 +92,6 @@ class TennisEvent(db.Model, UserMixin):
     away_venue_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)#### needs to be HOME venue ID and AWAY venue ID
     # Define the relationship with the School model for the home venue
     home_venue = db.relationship('School', foreign_keys=[home_venue_id], backref='home_events')
-    
     # Define the relationship with the School model for the away venue
     away_venue = db.relationship('School', foreign_keys=[away_venue_id], backref='away_events')
 
@@ -151,3 +150,9 @@ class SessionAttendance(db.Model, UserMixin):
 #     TeamName = db.Column(db.String(255), db.ForeignKey('teams.TeamName'), primary_key=True)
 #     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
 #     Position = db.Column(db.String(255))
+
+
+
+def count_unread_notifications(user_id):
+    count = Notification.query.filter_by(receiver_id=user_id, is_read=False).count()
+    return count

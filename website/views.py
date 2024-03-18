@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash
 from flask_login import login_required, current_user
-from .models import db, User, UserRatings, RatingCategory, School
+from .models import db, User, UserRatings, RatingCategory, School, Notification
+from sqlalchemy import func
 
 from faker import Faker
 from werkzeug.security import generate_password_hash
@@ -46,6 +47,12 @@ def settings():
 @login_required
 def profile():
     return render_template('profile.html', user=current_user)
+
+
+
+def count_unread_notifications(user_id):
+    count = Notification.query.filter_by(receiver_id=user_id, is_read=False).count()
+    return count
 
 
 

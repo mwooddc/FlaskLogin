@@ -2,7 +2,13 @@ from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from os import path
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
+
+
+
+
+
+
 
 
 
@@ -12,6 +18,10 @@ DB_NAME = "database.db"
 
 def create_app():
     app = Flask(__name__)
+
+
+
+
     #A SECRET KEY is required for use of sessions, it is used to encode the session
     # See https://youtu.be/PYILMiGxpAU?t=327 
     # Note we use flask_login to manage sessions but still need this secret key
@@ -34,10 +44,19 @@ def create_app():
     app.register_blueprint(player, url_prefix="/")
     app.register_blueprint(coach, url_prefix="/")
 
-    from .models import User
+    from .models import User, count_unread_notifications
 
     with app.app_context():
         db.create_all()
+
+        # Assuming count_unread_notifications is defined as shown previously
+    @app.context_processor
+    def inject_unread_notifications_count():
+        if current_user.is_authenticated:
+            unread_count = count_unread_notifications(current_user.id)
+        else:
+            unread_count = 0
+        return dict(unread_notifications_count=unread_count)
 
     #The line below will call the function on line 54 to create the database
     #Obviously we don't want to do this EVERY time otherwise it will create

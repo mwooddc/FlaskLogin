@@ -9,7 +9,7 @@
 <div class="container mt-4">
   <div class="row">
 
-    <!-- PANEL TWO -->
+    <!-- PANEL ONE -->
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
@@ -46,13 +46,36 @@
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Panel 2</h5>
-          <p class="card-text">Content for Panel 2 goes here.</p>
+          <h5 class="card-title">Upcoming Fixtures</h5>
+
+
+          <!-- {{upcoming_fixtures}} -->
+          <table id="fixturesTable" class="table table-striped" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Opponent</th>
+                    <th>Venue</th>
+                    <th>No. of Matches</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fixture in upcoming_fixtures %}
+                <tr>
+                    <td>{{ fixture.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ fixture.opponent_name }}</td>
+                    <td>{{ fixture.home_or_away }}</td>
+                    <td class="matches-header">{{ fixture.number_of_matches }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
         </div>
       </div>
     </div>
 
-    <!-- PANEL TWO -->
+    <!-- PANEL THREE -->
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
@@ -132,6 +155,18 @@
   }
 </script>
 
-
+<script>
+$(document).ready(function () {
+    $('#fixturesTable').DataTable({
+        "order": [[0, "asc"]], // Keeps your initial ordering based on the date column.
+        "columnDefs": [
+            {
+                "className": "dt-center", // Apply a class to center-align the text
+                "targets": 3 // Targets the 'No. of Matches' column. Index is based on a zero-based count.
+            }
+        ]
+    });
+});
+</script>
 
 {% endblock %}

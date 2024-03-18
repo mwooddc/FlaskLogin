@@ -6,6 +6,7 @@ from .auth import role_required
 from datetime import datetime
 from flask import jsonify
 import re
+from sqlalchemy import func, case, or_
 
 
 #A Blueprint simply allows you to create seperate files from the standard app.py
@@ -87,13 +88,81 @@ def reply_to_notifications():
 
 
 
+############# Upcoming Fixtures #####################################################
+#####################################################################################
+
+
+
+# Assuming `db` is your SQLAlchemy instance and session
+def get_upcoming_fixtures():
+    fixtures_query = db.session.query(
+        TennisEvent.date.label('date'),
+        TennisEvent.home_venue_id,
+        TennisEvent.away_venue_id,
+        db.func.count(Match.id).label('number_of_matches'),
+        db.case(
+            (TennisEvent.home_venue_id == 1, 'Home'),
+            else_='Away'
+        ).label('home_or_away')
+    ).join(
+        Match, Match.tennis_event_id == TennisEvent.id
+    ).filter(
+        TennisEvent.date >= datetime.now(),
+        or_(TennisEvent.home_venue_id == 1, TennisEvent.away_venue_id == 1)
+    ).group_by(TennisEvent.id).all()
+
+    return [
+        {
+            'date': fixture.date,
+            'number_of_matches': fixture.number_of_matches,
+            'home_or_away': fixture.home_or_away,
+            'opponent_name': '',  # Placeholder, to be filled in later
+            'home_venue_id': fixture.home_venue_id,
+            'away_venue_id': fixture.away_venue_id
+        }
+        for fixture in fixtures_query
+    ]
+
+def get_opponent_name(home_away, home_venue_id, away_venue_id):
+    opponent_id = away_venue_id if home_away == 'Home' else home_venue_id
+    opponent = School.query.filter_by(id=opponent_id).first()
+    return opponent.name if opponent else None
+
+def add_opponent_name_to_fixtures(fixtures):
+    for fixture in fixtures:
+        fixture['opponent_name'] = get_opponent_name(
+            fixture['home_or_away'],
+            fixture['home_venue_id'],
+            fixture['away_venue_id']
+        )
+    return fixtures
+
+
+# `fixtures` will be a list of tuples with the structure (date, home_or_away, opponent, number_of_matches)
+
+
+
+
+
+############# Upcoming Fixtures FINSIHED #####################################################
+##############################################################################################
+
+
+
+
+
+
+
+
 @coach.route('/coachdashboard', methods=['GET', 'POST'])
 @login_required
 @role_required('Coach')
 def coachdashboard():
     print("MADE IT")
     user_notifications = get_user_notifications(current_user.id)
-    return render_template('coachdash.html', user_notifications=user_notifications, user=current_user)
+    fixtures = get_upcoming_fixtures()
+    enriched_fixtures = add_opponent_name_to_fixtures(fixtures)
+    return render_template('coachdash.html', user_notifications=user_notifications, upcoming_fixtures=enriched_fixtures, user=current_user)
 
 
 
@@ -102,12 +171,9 @@ def coachdashboard():
 
 
 
-
-
-
-
-
-
+def count_unread_notifications(user_id):
+    count = Notification.query.filter_by(receiver_id=user_id, is_read=False).count()
+    return count
 
 
 
