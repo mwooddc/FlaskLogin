@@ -148,8 +148,128 @@ def add_opponent_name_to_fixtures(fixtures):
 ##############################################################################################
 
 
+################## Prepare data for individual ratings graph for each player  ########################################
+#####################################################################################################################
 
 
+def every_player_ratings_chart():
+    # Step 1: SQL Query Adjustment
+    
+    # Adjusted query
+    latest_user_category_ratings = db.session.query(
+        UserRatings.Rateeid,
+        UserRatings.RatingCategory,
+        func.max(UserRatings.date_created).label('latest_date')
+    ).join(
+        User, UserRatings.Rateeid == User.id  # Explicit join condition
+    ).filter(
+        User.Role == 'Player'
+    ).group_by(
+        UserRatings.Rateeid,
+        UserRatings.RatingCategory
+    ).subquery('latest_ratings')
+
+    # Assuming the ambiguous join was in the main query fetching the latest ratings' values
+    latest_ratings_query = db.session.query(
+        User.id,
+        User.Username,
+        RatingCategory.CategoryDescription,
+        UserRatings.Value,
+        latest_user_category_ratings.c.latest_date
+    ).select_from(UserRatings).join(
+        User, UserRatings.Rateeid == User.id  # Starting from UserRatings, joining to User
+    ).join(
+        latest_user_category_ratings, 
+        (UserRatings.Rateeid == latest_user_category_ratings.c.Rateeid) &
+        (UserRatings.date_created == latest_user_category_ratings.c.latest_date) &
+        (UserRatings.RatingCategory == latest_user_category_ratings.c.RatingCategory)
+    ).join(
+        RatingCategory, UserRatings.RatingCategory == RatingCategory.CategoryCode
+    ).order_by(User.Username).all()
+    
+    # Step 2: Data Structuring for Chart.js
+    
+    user_data = {}
+    for user_id, username, category_description, value, latest_date in latest_ratings_query:
+        if username not in user_data:
+            user_data[username] = {'total': 0, 'categories': {}}
+        
+        user_data[username]['categories'][category_description] = value
+        user_data[username]['total'] += value
+
+    labels = list(user_data.keys())
+    datasets = []
+    category_list = [cat.CategoryDescription for cat in RatingCategory.query.all()]
+    for category in category_list:
+        dataset = {
+            'label': category,
+            'data': [],
+            'backgroundColor': "assign_a_unique_color",  # Placeholder for color assignment
+        }
+        
+        for user, details in user_data.items():
+            dataset['data'].append(details['categories'].get(category, 0))
+        
+        datasets.append(dataset)
+
+    # Passing the structured data to the template
+    return labels, datasets
+
+
+################## Prepare data for individual ratings graph for each player FINISHED ########################################
+#######################################################################################
+
+
+################## Prepare data for TOTAL RATINGS SCORE player ratings graph for each player  ########################################
+#####################################################################################################################
+
+
+def total_score_player_ratings_chart():
+    # Adjusted query with Forename
+    latest_user_category_ratings = db.session.query(
+        UserRatings.Rateeid,
+        UserRatings.RatingCategory,
+        func.max(UserRatings.date_created).label('latest_date')
+    ).join(
+        User, UserRatings.Rateeid == User.id
+    ).filter(
+        User.Role == 'Player'
+    ).group_by(
+        UserRatings.Rateeid,
+        UserRatings.RatingCategory
+    ).subquery('latest_ratings')
+
+    latest_ratings_query = db.session.query(
+        User.Forename,  # Assuming Forename is the desired label
+        func.sum(UserRatings.Value).label('total_value')
+    ).select_from(UserRatings).join(
+        User, UserRatings.Rateeid == User.id
+    ).join(
+        latest_user_category_ratings,
+        (UserRatings.Rateeid == latest_user_category_ratings.c.Rateeid) &
+        (UserRatings.date_created == latest_user_category_ratings.c.latest_date) &
+        (UserRatings.RatingCategory == latest_user_category_ratings.c.RatingCategory)
+    ).join(
+        RatingCategory, UserRatings.RatingCategory == RatingCategory.CategoryCode
+    ).group_by(User.Forename).order_by(User.Forename).all()
+    
+    # Prepare data for Chart.js
+    labels = [result.Forename for result in latest_ratings_query]
+    totals = [result.total_value for result in latest_ratings_query]
+
+    datasets = [{
+        'label': 'Total Ratings',
+        'data': totals,
+        'backgroundColor': 'rgba(255, 99, 132, 0.2)',
+        'borderColor': 'rgba(255, 99, 132, 1)',
+        'borderWidth': 1
+    }]
+
+    return labels, datasets
+
+
+##################  Prepare data for TOTAL RATINGS SCORE player ratings graph for each player  FINISHED ########################################
+#######################################################################################
 
 
 
@@ -162,7 +282,8 @@ def coachdashboard():
     user_notifications = get_user_notifications(current_user.id)
     fixtures = get_upcoming_fixtures()
     enriched_fixtures = add_opponent_name_to_fixtures(fixtures)
-    return render_template('coachdash.html', user_notifications=user_notifications, upcoming_fixtures=enriched_fixtures, user=current_user)
+    total_recent_player_ratings_labels, total_recent_player_ratings_datasets = total_score_player_ratings_chart()
+    return render_template('coachdash.html', user_notifications=user_notifications, upcoming_fixtures=enriched_fixtures, total_recent_player_ratings_labels=total_recent_player_ratings_labels, total_recent_player_ratings_datasets=total_recent_player_ratings_datasets, user=current_user)
 
 
 
@@ -387,6 +508,12 @@ def create_event_and_matches():
             # return render_template('create_event_and_matches.html', errors=errors, user=current_user, event=event, schools=schools)
 
     return render_template('create_event_and_matches.html', user=current_user, schools=schools, players=players_dict)
+
+
+
+
+
+
 
 
 

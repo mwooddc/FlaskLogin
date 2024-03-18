@@ -79,10 +79,11 @@
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Panel 3</h5>
-          <p class="card-text">Content for Panel 3 goes here.</p>
+          <h5 class="card-title">Current Total Ratings Score</h5>
+          <!-- {{total_recent_player_ratings_labels}}</br></br>
+          {{total_recent_player_ratings_datasets}} -->
           <div>
-            <canvas id="myChart"></canvas>
+            <canvas id="latest_ratings_chart"></canvas>
           </div>
           
         </div>
@@ -168,5 +169,55 @@ $(document).ready(function () {
     });
 });
 </script>
+
+
+
+
+<script>
+var ctx = document.getElementById('latest_ratings_chart').getContext('2d');
+var totalRatingsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {{ total_recent_player_ratings_labels | tojson | safe }},
+        datasets: {{ total_recent_player_ratings_datasets | tojson | safe }}
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Total Rating Scores'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Player'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false  // Set to true if you want to display the dataset label
+            }
+        }
+    }
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 {% endblock %}
