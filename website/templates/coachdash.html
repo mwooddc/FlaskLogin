@@ -7,6 +7,7 @@
 
 <!-- Here we use Jinja to get access to the current logged in users object -->
 <div class="container mt-4">
+
   <div class="row">
 
     <!-- PANEL ONE -->
@@ -82,6 +83,8 @@
           <h5 class="card-title">Current Total Ratings Score</h5>
           <!-- {{total_recent_player_ratings_labels}}</br></br>
           {{total_recent_player_ratings_datasets}} -->
+          <!-- {{player_ratings_labels}}</br></br>
+          {{player_ratings_datasets}} -->
           <div>
             <canvas id="latest_ratings_chart"></canvas>
           </div>
@@ -91,7 +94,86 @@
     </div>
 
 
+  </div> 
+  <!-- ##### END OF ROW 1 ##### -->
+
+
+
+
+
+
+  <div class="row">
+
+    <!-- PANEL FOUR -->
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Player Combined Category Scores</h5>
+          <!-- {{total_recent_player_ratings_labels}}</br></br>
+          {{total_recent_player_ratings_datasets}} -->
+          <!-- {{player_ratings_labels}}</br></br>
+          {{player_ratings_datasets}} -->
+          <div>
+            <!-- <canvas id="latest_ratings_chart"></canvas> -->
+            <canvas id="players_total_ratings"></canvas>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL FIVE -->
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Recent Results</h5>
+          <!-- {{recent_results}} -->
+
+          <table id="recentResultsTable" class="table table-striped" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Opponent</th>
+                    <th>No. of Matches</th>
+                    <th>Won</th>
+                    <th>Lost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in recent_results %}
+                <tr>
+                    <td>{{ result.date }}</td>
+                    <td>{{ result.opponent_name }}</td>
+                    <td class="matches-header">{{ result.number_of_matches }}</td>
+                    <td>{{ result.wins }}</td>
+                    <td>{{ result.losses }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL SIX -->
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Upcoming Training Sessions</h5>
+          
+        </div>
+      </div>
+    </div>
+
+
   </div>
+
+
+
+
+
 </div>
 
 
@@ -209,7 +291,47 @@ var totalRatingsChart = new Chart(ctx, {
 
 
 
-
+<script>
+  // Assuming you have a predefined array of colors
+  var colors = [
+      'rgba(255, 99, 132, 0.2)',
+      'rgba(54, 162, 235, 0.2)',
+      'rgba(255, 206, 86, 0.2)',
+      'rgba(75, 192, 192, 0.2)',
+      'rgba(153, 102, 255, 0.2)',
+      'rgba(255, 159, 64, 0.2)',
+      // Add more colors as needed
+  ];
+  
+  // Using Jinja2 to insert Flask variables into JavaScript
+  var playerLabels = {{ player_ratings_labels|tojson }};
+  var playerDatasets = {{ player_ratings_datasets|tojson }};
+  
+  // Assign a color to each dataset from the predefined array
+  for (let i = 0; i < playerDatasets.length; i++) {
+      playerDatasets[i].backgroundColor = colors[i % colors.length]; // Cycle through colors if not enough
+  }
+  
+  var ctx = document.getElementById('players_total_ratings').getContext('2d');
+  var myChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels: playerLabels,
+          datasets: playerDatasets
+      },
+      options: {
+          scales: {
+              x: {
+                  stacked: true,
+              },
+              y: {
+                  stacked: true
+              }
+          }
+      }
+  });
+  </script>
+  
 
 
 

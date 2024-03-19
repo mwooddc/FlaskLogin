@@ -17,6 +17,10 @@ Green: #158e6c
   text-align: center;
 }
 
+#recentResultsTable .matches-header, #recentResultsTable td:nth-child(3) { /* Assuming 'No. of Matches' is the 4th column */
+  text-align: center;
+}
+
 :root {
   --background-color-light: #FFFFFF; /* White for light mode */
   --background-color-dark: #353f4c; /* Dark grey for dark mode */

@@ -6,7 +6,7 @@ from .auth import role_required
 from datetime import datetime
 from flask import jsonify
 import re
-from sqlalchemy import func, case, or_
+from sqlalchemy import func, case, or_, desc
 
 
 #A Blueprint simply allows you to create seperate files from the standard app.py
@@ -148,6 +148,103 @@ def add_opponent_name_to_fixtures(fixtures):
 ##############################################################################################
 
 
+############# Recent Results  #####################################################
+##############################################################################################
+
+
+
+def get_recent_results():
+    recent_events = TennisEvent.query.filter(
+        or_(TennisEvent.home_venue_id == 1, TennisEvent.away_venue_id == 1),
+        TennisEvent.date < datetime.utcnow()  # Adjust timezone as necessary
+    ).order_by(desc(TennisEvent.date)).limit(5).all()
+
+    results = []
+    for event in recent_events:
+        home_or_away = 'Home' if event.home_venue_id == 1 else 'Away'
+        opponent_id = event.away_venue_id if home_or_away == 'Home' else event.home_venue_id
+        opponent = School.query.get(opponent_id)
+
+        # Directly count the number of matches for this event
+        number_of_matches = len(event.matches)
+
+        # Assume wins and losses calculation is corrected here
+        wins = sum(1 for match in event.matches if match.won_or_lost == 'Won')
+        losses = sum(1 for match in event.matches if match.won_or_lost == 'Lost')
+
+        results.append({
+            'date': event.date.strftime('%Y-%m-%d'),
+            'opponent_name': opponent.name if opponent else 'Unknown',
+            'home_or_away': home_or_away,
+            'wins': wins,
+            'losses': losses,
+            'number_of_matches': number_of_matches,
+        })
+
+    return results
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############# Recent Results FINISHED #####################################################
+##############################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ################## Prepare data for individual ratings graph for each player  ########################################
 #####################################################################################################################
 
@@ -283,7 +380,9 @@ def coachdashboard():
     fixtures = get_upcoming_fixtures()
     enriched_fixtures = add_opponent_name_to_fixtures(fixtures)
     total_recent_player_ratings_labels, total_recent_player_ratings_datasets = total_score_player_ratings_chart()
-    return render_template('coachdash.html', user_notifications=user_notifications, upcoming_fixtures=enriched_fixtures, total_recent_player_ratings_labels=total_recent_player_ratings_labels, total_recent_player_ratings_datasets=total_recent_player_ratings_datasets, user=current_user)
+    player_ratings_labels, player_ratings_datasets = every_player_ratings_chart()
+    recent_results = get_recent_results()
+    return render_template('coachdash.html', user_notifications=user_notifications, recent_results=recent_results, upcoming_fixtures=enriched_fixtures, player_ratings_labels=player_ratings_labels, player_ratings_datasets=player_ratings_datasets, total_recent_player_ratings_labels=total_recent_player_ratings_labels, total_recent_player_ratings_datasets=total_recent_player_ratings_datasets, user=current_user)
 
 
 
