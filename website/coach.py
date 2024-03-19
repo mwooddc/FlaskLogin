@@ -184,28 +184,8 @@ def get_recent_results():
     return results
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ############# Recent Results FINISHED #####################################################
 ##############################################################################################
-
-
 
 
 
@@ -371,6 +351,33 @@ def total_score_player_ratings_chart():
 
 
 
+
+def player_ratings_graph():
+    players = User.query.filter_by(Role='Player').all()
+    categories = RatingCategory.query.all()
+    categories=[c.CategoryDescription for c in categories]
+    return players, categories
+
+
+
+@coach.route('/get_player_ratings/<int:player_id>')
+@login_required
+@role_required('Coach')
+def get_player_ratings(player_id):
+    ratings = UserRatings.query.filter_by(Rateeid=player_id).all()
+    ratings_data = {}
+    for rating in ratings:
+        category_desc = RatingCategory.query.get(rating.RatingCategory).CategoryDescription
+        ratings_data[category_desc] = rating.Value
+    return jsonify(ratings_data)
+
+
+
+
+
+
+
+
 @coach.route('/coachdashboard', methods=['GET', 'POST'])
 @login_required
 @role_required('Coach')
@@ -382,7 +389,13 @@ def coachdashboard():
     total_recent_player_ratings_labels, total_recent_player_ratings_datasets = total_score_player_ratings_chart()
     player_ratings_labels, player_ratings_datasets = every_player_ratings_chart()
     recent_results = get_recent_results()
-    return render_template('coachdash.html', user_notifications=user_notifications, recent_results=recent_results, upcoming_fixtures=enriched_fixtures, player_ratings_labels=player_ratings_labels, player_ratings_datasets=player_ratings_datasets, total_recent_player_ratings_labels=total_recent_player_ratings_labels, total_recent_player_ratings_datasets=total_recent_player_ratings_datasets, user=current_user)
+    players, categories = player_ratings_graph()
+    # Inside your coachdashboard function, before returning the render_template call
+    base_get_player_ratings_url = url_for('coach.get_player_ratings', player_id=0)[:-1]
+    # Note: We append a '0' that we'll remove in the template to ensure Flask processes this route correctly.
+
+
+    return render_template('coachdash.html', user_notifications=user_notifications, base_get_player_ratings_url=base_get_player_ratings_url, players=players, categories=categories, recent_results=recent_results, upcoming_fixtures=enriched_fixtures, player_ratings_labels=player_ratings_labels, player_ratings_datasets=player_ratings_datasets, total_recent_player_ratings_labels=total_recent_player_ratings_labels, total_recent_player_ratings_datasets=total_recent_player_ratings_datasets, user=current_user)
 
 
 

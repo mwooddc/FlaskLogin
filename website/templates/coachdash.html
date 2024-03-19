@@ -80,7 +80,7 @@
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Current Total Ratings Score</h5>
+          <h5 class="card-title">Upcoming Training Sessions</h5>
           <!-- {{total_recent_player_ratings_labels}}</br></br>
           {{total_recent_player_ratings_datasets}} -->
           <!-- {{player_ratings_labels}}</br></br>
@@ -161,7 +161,14 @@
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Upcoming Training Sessions</h5>
+          <h5 class="card-title">Latest Individual Player Ratings</h5>
+          <select id="playerSelect">
+            {% for player in players %}
+            <option value="{{ player.id }}">{{ player.Forename }} {{ player.Surname }}</option>
+            {% endfor %}
+          </select>
+          <canvas id="ratingsChart"></canvas>
+
           
         </div>
       </div>
@@ -252,6 +259,13 @@ $(document).ready(function () {
 });
 </script>
 
+<script>
+  $(document).ready(function() {
+      $('#recentResultsTable').DataTable({
+          "order": [[0, "desc"]] // Orders the table based on the date column in descending order.
+      });
+  });
+  </script>
 
 
 
@@ -333,7 +347,59 @@ var totalRatingsChart = new Chart(ctx, {
   </script>
   
 
+  
 
+
+
+  <script>
+    var ctx = document.getElementById('ratingsChart').getContext('2d');
+    var ratingsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ categories | tojson }},
+            datasets: [{
+                label: 'Skill Ratings',
+                data: [], // Data to be filled by the AJAX response
+                backgroundColor: 'rgba(255, 99, 132, 0.2)'
+            }]
+        },
+        options: {
+            scales: {
+                x: {  // 'x' is used for the x-axis scale ID in Chart.js 3.x
+                    ticks: {
+                        autoSkip: true,
+                        maxRotation: 90, // Rotate 90 degrees
+                        minRotation: 90  // Rotate 90 degrees
+                    }
+                }
+            }
+        }
+    });
+
+    console.log('jQuery version:', $.fn.jquery);
+    // Your AJAX call code here
+
+    $(document).ready(function() {
+        var baseGetRatingsUrl = "{{ base_get_player_ratings_url }}";
+        $('#playerSelect').change(function() {
+            var playerId = $(this).val();
+            var fullUrl = baseGetRatingsUrl + playerId; // Directly append the player ID to the base URL
+
+            $.ajax({
+                url: fullUrl,
+                type: 'GET',
+                success: function(response) {
+                    console.log(response);
+                    ratingsChart.data.datasets[0].data = Object.values(response);
+                    ratingsChart.update();
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error:", status, error);
+                }
+            });
+        });
+    });
+</script>
 
 
 
