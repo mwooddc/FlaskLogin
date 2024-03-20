@@ -9,6 +9,7 @@ from .models import User
 from functools import wraps
 #Great video to explain flask_login library: https://www.youtube.com/watch?v=2dEM-s3mRLE
 from flask_login import login_user, logout_user, login_required, current_user
+from .forms import LoginForm, SignUpForm
 from werkzeug.security import generate_password_hash, check_password_hash
 
 #A Blueprint simply allows you to create seperate files from the standard app.py
@@ -21,31 +22,43 @@ auth = Blueprint("auth", __name__)
 
 @auth.route("/login", methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        Email = request.form.get("Email")
-        Password = request.form.get("Password")
+    form = LoginForm()
+    # if request.method == 'POST':
+    #     Email = request.form.get("Email")
+    #     Password = request.form.get("Password")
 
-        user = User.query.filter_by(Email=Email).first()
-        if user:
-            if check_password_hash(user.Password, Password):
-                flash("Logged in!", category='success')
-                # Logs in the User whos Email and hashed Password match
-                #(see variable above User =   on line 26)
-                login_user(user, remember=True)
-                # Store the user's role in the session
-                session['role'] = user.Role
-                #redirect to views.home where the User is passed as an object
-                return redirect(url_for('views.home'))
-            else:
-                flash('Password is incorrect.', category='error')
+    if form.validate_on_submit():
+        user = User.query.filter_by(Email=form.Email.data).first()
+        if user and check_password_hash(user.Password, form.Password.data):
+            login_user(user, remember=True)
+            flash('Logged in successfully!', category='success')
+            return redirect(url_for('views.home'))
         else:
-            flash('Email does not exist.', category='error')
+            flash('Invalid email or password.', category='error')
+    return render_template('login.html', form=form, user = current_user)
 
-    return render_template("login.html", user = current_user)
+    #     user = User.query.filter_by(Email=Email).first()
+    #     if user:
+    #         if check_password_hash(user.Password, Password):
+    #             flash("Logged in!", category='success')
+    #             # Logs in the User whos Email and hashed Password match
+    #             #(see variable above User =   on line 26)
+    #             login_user(user, remember=True)
+    #             # Store the user's role in the session
+    #             session['role'] = user.Role
+    #             #redirect to views.home where the User is passed as an object
+    #             return redirect(url_for('views.home'))
+    #         else:
+    #             flash('Password is incorrect.', category='error')
+    #     else:
+    #         flash('Email does not exist.', category='error')
+
+    # return render_template("login.html", user = current_user)
 
 
 @auth.route("/sign-up", methods=['GET', 'POST'])
 def sign_up():
+    form = SignUpForm()
     Email = ""
     Username = ""
     Forename = ""
@@ -86,7 +99,8 @@ def sign_up():
             flash('User created!')
             return redirect(url_for('views.home'))
 
-    return render_template("signup.html", user=current_user, 
+    return render_template("signup.html", user=current_user,
+                           form=form, 
                            email=Email, username=Username, 
                            forename=Forename, surname=Surname, role=Role)
 

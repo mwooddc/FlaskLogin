@@ -2,9 +2,9 @@ from flask import Blueprint, render_template, session, redirect, url_for, flash
 from flask_login import login_required, current_user
 from .models import db, User, UserRatings, RatingCategory, School, Notification
 from sqlalchemy import func
-
+from .forms import LoginForm
 from faker import Faker
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import random
 from datetime import datetime, timedelta
 
