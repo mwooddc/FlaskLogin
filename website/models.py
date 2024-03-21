@@ -28,6 +28,7 @@ class User(db.Model, UserMixin):
     Forename = db.Column(db.String(255), nullable=False)
     Surname = db.Column(db.String(255), nullable=False)
     Role = db.Column(db.String(50), nullable=False)  # 'Player' or 'Coach'
+    survey_completed = db.Column(db.Boolean, default=False, nullable=False)
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     # Relationships
     

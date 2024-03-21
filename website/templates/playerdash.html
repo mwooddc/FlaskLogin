@@ -98,7 +98,7 @@
 
 
 
-<!-- MODAL -->
+<!-- Notifications MODAL -->
 <sl-dialog id="replyModal" label="Notification Details">
   <span class="bold-text">Date|Time: </span><span id="notificationDate"></span></br>
   <span class="bold-text">Sender: </span><span id="notificationSender"></span></br>
@@ -111,6 +111,81 @@
     <button type="submit" class="btn pink-btn btn-notifications">Send Reply</button>
   </form>
 </sl-dialog>
+
+<!-- Survey MODAL -->
+{% if form %}
+  {% if not survey_completed %}
+  <!-- Survey Modal Start -->
+  <sl-dialog label="Skill Level Self Assessment" id="surveyModal" open>
+    <p>Welcome to Tennis Coach</p></br>
+    <p>You will fill this 'Skill Level Self Assessment' form in only once (the first time you log
+      in). It is important that you rate each of the skills honestly, so as to effectively see and
+      monitor your progress and development over time.</p></br>
+      <p>For each category rate yourself from 0-10 where 0 is poor and 10 is outstanding</p></br></br>
+    </p>
+ 
+    <form method="post" action="{{ url_for('player.submit_survey') }}">
+      {{ form.hidden_tag() }}
+      <div class="container">
+          {% for field_name, field in form._fields.items() %}
+              {# Skip CSRF token field for layout purposes #}
+              {% if field.type != 'CSRFTokenField' %}
+                  {# Open a new row for every two fields or at the start #}
+                  {% if loop.index0 is divisibleby 2 %}
+                      {% if not loop.first %}</div>{% endif %}
+                      <div class="row">
+                  {% endif %}
+                  <div class="col-md-6">
+                      <div class="form-group">
+                          {{ field.label }}: {{ field(class="form-control") }}
+                          {% if field.errors %}
+                              <ul class="errors">
+                                  {% for error in field.errors %}
+                                      <li>{{ error }}</li>
+                                  {% endfor %}
+                              </ul>
+                          {% endif %}
+                      </div>
+                  </div>
+                  {# Automatically close the last row after the loop ends #}
+                  {% if loop.last %}
+                      </div>
+                  {% endif %}
+              {% endif %}
+          {% endfor %}
+      </div>
+      <div class="modal-footer">
+          <button type="submit" class="btn pink-btn btn-notifications">Submit</button>
+      </div>
+  </form>
+  
+
+
+  </sl-dialog>
+  <!-- Survey Modal End -->
+  {% endif %}
+{% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

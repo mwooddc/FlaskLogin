@@ -1,11 +1,12 @@
-from flask import Blueprint, render_template, session, request, redirect, url_for, jsonify
+from flask import Blueprint, render_template, session, request, redirect, url_for, jsonify, flash
 from flask_login import login_required, current_user
+from .models import User
 from .auth import role_required
 from collections import defaultdict
 # from collections import defaultdict
 # from sqlalchemy.sql import func
 from datetime import datetime
-
+from .forms import generate_survey_form
 from .models import db, UserRatings, RatingCategory, Notification  # Adjust the import as per your project structure
 
 
@@ -87,11 +88,72 @@ def reply_to_notification():
 
 
 
+############# HANDLING INITIAL SURVEY #####################################################
+###################################################################################################
+
+@player.route('/submit_survey', methods=['POST'])
+@login_required
+@role_required('Player')
+def submit_survey():
+    form = generate_survey_form()()
+    if form.validate_on_submit():
+        user_id = current_user.id
+        # Check if the survey is already completed to avoid duplicate entries
+        survey_already_completed = User.query.get(user_id).survey_completed
+        if not survey_already_completed:
+            for category in RatingCategory.query.all():
+                field_name = f'rating_{category.CategoryCode}'
+                rating_value = getattr(form, field_name).data
+                new_rating = UserRatings(Raterid=user_id, Rateeid=user_id, RatingCategory=category.CategoryCode, Value=rating_value)
+                db.session.add(new_rating)
+            # Mark the survey as completed for the user
+            current_user.survey_completed = True
+            db.session.commit()
+            flash('Thank you for completing the survey!', 'success')
+        else:
+            flash('You have already completed the survey.', 'info')
+        return redirect(url_for('player.playerdashboard'))
+    else:
+        # If the form doesn't validate, you may want to flash an error and redirect back to the survey
+        # or render the form again with error messages.
+        flash('There was an error with your submission. Please ensure all fields are filled out correctly.', 'error')
+        return redirect(url_for('player.submit_survey'))  # Assuming 'player.survey' is the route where your survey form is located
+
+
+############# HANDLING INITIAL SURVEY FINISHED #####################################################
+###################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @player.route('/playerdashboard')
 @login_required
 @role_required('Player')
 def playerdashboard():
+    CoachID = 2 #This is the coachesID
     role = session.get('role', 'Player')  # Default to 'Player' if not set
+
+    user = User.query.get(current_user.id)
+    survey_completed = user.survey_completed
+
+    # Conditional form generation based on survey completion
+    form = generate_survey_form()() if not survey_completed else None
+
 
     user_notifications = get_user_notifications(current_user.id)
 
@@ -99,6 +161,7 @@ def playerdashboard():
     ratings_query = db.session.query(UserRatings.Value, UserRatings.date_created, RatingCategory.CategoryDescription)\
         .join(RatingCategory)\
         .filter(UserRatings.Rateeid == current_user.id)\
+        .filter(UserRatings.Raterid == CoachID)\
         .order_by(UserRatings.date_created.asc()).all()
     
     #Iterate over the ratings query and remove any repeating categories, keep only the latest
@@ -159,4 +222,4 @@ def playerdashboard():
         # Append to the final data structure
         players_rating_data.append({'Category': category, 'Value': adjusted_values, 'Date': unique_dates})
 
-    return render_template('playerdash.html', ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, players_rating_data=players_rating_data, categories=categories, user_notifications=user_notifications, user=current_user)
+    return render_template('playerdash.html', survey_completed=survey_completed, form=form, ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, players_rating_data=players_rating_data, categories=categories, user_notifications=user_notifications, user=current_user)

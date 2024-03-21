@@ -225,12 +225,13 @@ def get_recent_results():
 
 
 
-################## Prepare data for individual ratings graph for each player  ########################################
+################## Prepare data for Player Combined Category Scores Graph  ########################################
 #####################################################################################################################
 
 
 def every_player_ratings_chart():
     # Step 1: SQL Query Adjustment
+    CoachID = 1
     
     # Adjusted query
     latest_user_category_ratings = db.session.query(
@@ -240,7 +241,8 @@ def every_player_ratings_chart():
     ).join(
         User, UserRatings.Rateeid == User.id  # Explicit join condition
     ).filter(
-        User.Role == 'Player'
+        User.Role == 'Player',
+        UserRatings.Raterid == CoachID # So only the coach ratings
     ).group_by(
         UserRatings.Rateeid,
         UserRatings.RatingCategory
@@ -293,15 +295,16 @@ def every_player_ratings_chart():
     return labels, datasets
 
 
-################## Prepare data for individual ratings graph for each player FINISHED ########################################
+##################  FINISHED ########################################
 #######################################################################################
 
 
-################## Prepare data for TOTAL RATINGS SCORE player ratings graph for each player  ########################################
+################## Prepare data for Upcoming Training Sessions Graph  ########################################
 #####################################################################################################################
 
 
 def total_score_player_ratings_chart():
+    CoachID = 1
     # Adjusted query with Forename
     latest_user_category_ratings = db.session.query(
         UserRatings.Rateeid,
@@ -310,7 +313,8 @@ def total_score_player_ratings_chart():
     ).join(
         User, UserRatings.Rateeid == User.id
     ).filter(
-        User.Role == 'Player'
+        User.Role == 'Player',
+        UserRatings.Raterid == CoachID # So only the coach ratings
     ).group_by(
         UserRatings.Rateeid,
         UserRatings.RatingCategory
@@ -345,7 +349,7 @@ def total_score_player_ratings_chart():
     return labels, datasets
 
 
-##################  Prepare data for TOTAL RATINGS SCORE player ratings graph for each player  FINISHED ########################################
+##################  FINISHED ########################################
 #######################################################################################
 
 
@@ -360,11 +364,17 @@ def player_ratings_graph():
 
 
 
+###### Latest Individual Player Ratings Graph #########
+
 @coach.route('/get_player_ratings/<int:player_id>')
 @login_required
 @role_required('Coach')
 def get_player_ratings(player_id):
-    ratings = UserRatings.query.filter_by(Rateeid=player_id).all()
+    CoachID = 1
+    ratings = UserRatings.query.filter(
+        UserRatings.Rateeid==player_id,
+        UserRatings.Raterid == CoachID
+        ).all()
     ratings_data = {}
     for rating in ratings:
         category_desc = RatingCategory.query.get(rating.RatingCategory).CategoryDescription
@@ -372,7 +382,7 @@ def get_player_ratings(player_id):
     return jsonify(ratings_data)
 
 
-
+###### Latest Individual Player Ratings Graph FINISHED #########
 
 
 

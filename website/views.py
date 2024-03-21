@@ -108,18 +108,19 @@ def populate_schools():
 @views.route("/populate_player_ratings")
 # Predefined category descriptions
 def populate_player_ratings():
+    CoachID = 1
     player_ratings =[
-        [2,4,1,5,"2024-03-05"],
-        [2,4,2,3,"2024-03-05"],
-        [2,4,3,6,"2024-03-05"],
-        [2,4,4,2,"2024-03-05"],
-        [2,4,5,8,"2024-03-07"],
-        [2,4,6,5,"2024-03-07"],
-        [2,4,1,7,"2024-03-07"],
-        [2,4,2,5,"2024-03-07"],
-        [2,4,7,7,"2024-03-08"],
-        [2,4,3,3,"2024-03-10"],
-        [2,4,4,4,"2024-03-12"]
+        [CoachID,4,1,5,"2024-03-05"],
+        [CoachID,4,2,3,"2024-03-05"],
+        [CoachID,4,3,6,"2024-03-05"],
+        [CoachID,4,4,2,"2024-03-05"],
+        [CoachID,4,5,8,"2024-03-07"],
+        [CoachID,4,6,5,"2024-03-07"],
+        [CoachID,4,1,7,"2024-03-07"],
+        [CoachID,4,2,5,"2024-03-07"],
+        [CoachID,4,7,7,"2024-03-08"],
+        [CoachID,4,3,3,"2024-03-10"],
+        [CoachID,4,4,4,"2024-03-12"]
     ]
     for i in range(len(player_ratings)):
         Raterid = player_ratings[i][0]
@@ -185,8 +186,8 @@ def populate_users():
     ####################################################################################
 
     set_users =[
-        ["player@player.com","player","player123","player","player","Player"],
         ["coach@coach.com","coach","coach123","coach","coach","Coach"],
+        ["player@player.com","player","player123","player","player","Player"],
         ["player2@player2.com","player2","player2123","player2","player2","Player"],
         ["sam@sam.com","sam","sam123","sam","smith","Player"]
     ]

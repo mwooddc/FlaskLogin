@@ -96,3 +96,13 @@ class SignUpForm(FlaskForm):
     Password2 = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('Password1', message='Passwords must match')], render_kw={"placeholder": "Re-Enter Password"})
     Role = RadioField('Role', choices=[('Coach','Coach'), ('Player','Player')], default='Player')
     submit = SubmitField('Sign Up')
+
+def generate_survey_form():
+    class DynamicSurveyForm(FlaskForm):
+        pass
+
+    for category in RatingCategory.query.all():
+        field_name = f'rating_{category.CategoryCode}'
+        setattr(DynamicSurveyForm, field_name, IntegerField(f'{category.CategoryDescription}', validators=[DataRequired(), NumberRange(min=0, max=10)]))
+
+    return DynamicSurveyForm
