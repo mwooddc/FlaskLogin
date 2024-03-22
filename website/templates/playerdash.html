@@ -146,6 +146,10 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Progress Made</h5>
+          <!-- PLAYER: {{player_ratings}}</br></br>
+          COACH: {{coach_ratings}}</br></br> -->
+
+          <canvas id="player_coach_ratings_chart"></canvas>
 
         </div>
       </div>
@@ -269,12 +273,16 @@
   const players_rating_data = {{ players_rating_data | tojson | safe }};
   // Extracting data from players_rating_data
   const labels = players_rating_data[0].Date;
-  const datasets = players_rating_data.map(entry => ({
+  const datasets = players_rating_data.map(entry => {
+    const randomColor = '#' + (Math.random().toString(16) + '000000').substring(2, 8); // Generate random color
+    return{
       label: entry.Category,
       data: entry.Value,
       fill: false,
-      borderColor: '#' + (Math.random().toString(16) + '000000').substring(2, 8) // Random color
-  }));
+      borderColor: randomColor,
+      backgroundColor: randomColor
+    };
+  });
 
   // Create the chart
   const ctx = document.getElementById('userRatingsChart').getContext('2d');
@@ -289,6 +297,13 @@
           maintainAspectRatio: false,
           aspectRatio: 0.9, // Set a custom aspect ratio (e.g., 2:1)
           scales: {
+              x: {  // Specify x-axis scale options
+                  ticks: {
+                      autoSkip: true,
+                      maxRotation: 90, // Rotate 90 degrees
+                      minRotation: 90  // Rotate 90 degrees
+                  }
+              },
               y: {
                   min: 0,
                   max: 10,
@@ -300,6 +315,10 @@
       }
   });
 </script>
+
+
+
+
 
 <script>
   $(document).ready( function () {
@@ -347,6 +366,60 @@
   }
 </script>
 
+
+<script>
+  // Retrieve player and coach ratings from Flask template context
+  var playerRatings = {{ player_ratings | tojson }};
+  var coachRatings = {{ coach_ratings | tojson }};
+
+  // Extract category labels and ratings from dictionaries
+  var categories = Object.keys(playerRatings);
+  var playerData = Object.values(playerRatings);
+  const randomColor1 = '#' + (Math.random().toString(16) + '000000').substring(2, 8); // Generate random color
+  const randomColor2 = '#' + (Math.random().toString(16) + '000000').substring(2, 8); // Generate random color
+
+
+  var coachData = categories.map(function(category) {
+      return coachRatings[category] || null; // Handle missing coach ratings
+  });
+
+  // Create Chart.js line graph
+  var ctx2 = document.getElementById('player_coach_ratings_chart').getContext('2d');
+  var player_coach_ratings_chart = new Chart(ctx2, {
+      type: 'line',
+      data: {
+          labels: categories,
+          datasets: [{
+              label: 'Player Ratings',
+              data: playerData,
+              borderColor: randomColor1,
+              backgroundColor: randomColor1,
+              fill: false
+          }, {
+              label: 'Coach Ratings',
+              data: coachData,
+              borderColor: randomColor2,
+              backgroundColor: randomColor2,
+              fill: false
+          }]
+      },
+      options: {
+        scales: {
+            x: {  // 'x' is used for the x-axis scale ID in Chart.js 3.x
+                ticks: {
+                    autoSkip: true,
+                    maxRotation: 90, // Rotate 90 degrees
+                    minRotation: 90  // Rotate 90 degrees
+                }
+            },
+            y: {
+                beginAtZero: true,
+                suggestedMax: 10
+              }
+          }
+      }
+  });
+</script>
   
 
 

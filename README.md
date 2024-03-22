@@ -29,6 +29,21 @@ In the auth.py file on line 68 the sha256 method is passed as a parameter but in
 
 Have used https://datatables.net/ for table layout css
 
+# CSRF Form issues
+<!-- If there are any CSRF issues before you do anything, try deleteing this line of code in __init__.py: -->
+    csrf = CSRFProtect(app)
+Then put it back in.
+
+If you have created a Flask-WTF Form then this needs to be put in the form tag: 
+<!-- <form method="POST">
+  {{ form.csrf_token }}
+</form> -->
+If there is no Flask-WTF Form created for the form then you put this in the form tag:
+<!-- <form method="POST">
+  {{ csrf_token() }}
+</form> -->
+
+
 # How to Merge Branches on Git
 Open a Pull Request (PR):
 
