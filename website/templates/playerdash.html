@@ -46,19 +46,29 @@
       <div class="card">
         <div class="card-body">
           <!-- <h5 class="card-title">Player ratings for: {{ current_user.Forename }}</h5> -->
-          <h5 class="card-title">Coach Ratings Over Time</h5>
-          <!-- Check these for testing purposes<br/><br/>
-          {{user_notifications}}<br/><br/>
-          {{datasets}}<br/><br/>
-          {{players_rating_data}}<br/><br/>
-          {{categories}}<br/><br/>
-          {{ratings_query}} -->
-          
+          <h5 class="card-title">Upcoming Fixtures</h5>
 
-          <div id="chart-container">
-            <canvas id="userRatingsChart" ></canvas>
-          </div>
-
+          <!-- {{user_upcoming_fixtures}} -->
+          <table id="UserFixturesTable" class="table table-striped" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Opponent</th>
+                    <th>Venue</th>
+                    <th>No. of Matches</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fixture in user_upcoming_fixtures %}
+                <tr>
+                    <td>{{ fixture.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ fixture.opponent_name }}</td>
+                    <td>{{ fixture.home_or_away }}</td>
+                    <td class="matches-header">{{ fixture.number_of_matches }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
         </div>
       </div>
@@ -88,12 +98,64 @@
       </div>
     </div>
 
+  </div>
 
 
 
+  <div class="row">
 
+    <!-- PANEL FOUR -->
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Recent Results</h5>
+
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- PANEL FIVE -->
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <!-- <h5 class="card-title">Player ratings for: {{ current_user.Forename }}</h5> -->
+          <h5 class="card-title">Coach Ratings Over Time</h5>
+
+          <!-- Check these for testing purposes<br/><br/>
+          {{user_notifications}}<br/><br/>
+          {{datasets}}<br/><br/>
+          {{players_rating_data}}<br/><br/>
+          {{categories}}<br/><br/>
+          {{ratings_query}} -->
+          
+
+          <div id="chart-container">
+            <canvas id="userRatingsChart" ></canvas>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- PANEL SIX -->
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Progress Made</h5>
+
+        </div>
+      </div>
+    </div>
 
   </div>
+
+
+
+
 </div>
 
 
@@ -169,7 +231,19 @@
 
 
 
-
+<script>
+  $(document).ready(function () {
+      $('#UserFixturesTable').DataTable({
+          "order": [[0, "asc"]], // Keeps your initial ordering based on the date column.
+          "columnDefs": [
+              {
+                  "className": "dt-center", // Apply a class to center-align the text
+                  "targets": 3 // Targets the 'No. of Matches' column. Index is based on a zero-based count.
+              }
+          ]
+      });
+  });
+  </script>
 
 
 

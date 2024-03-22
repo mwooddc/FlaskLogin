@@ -141,9 +141,6 @@ def add_opponent_name_to_fixtures(fixtures):
 # `fixtures` will be a list of tuples with the structure (date, home_or_away, opponent, number_of_matches)
 
 
-
-
-
 ############# Upcoming Fixtures FINSIHED #####################################################
 ##############################################################################################
 
@@ -186,41 +183,6 @@ def get_recent_results():
 
 ############# Recent Results FINISHED #####################################################
 ##############################################################################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

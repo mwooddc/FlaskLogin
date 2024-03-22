@@ -5,9 +5,10 @@ from .auth import role_required
 from collections import defaultdict
 # from collections import defaultdict
 # from sqlalchemy.sql import func
+from sqlalchemy import or_
 from datetime import datetime
 from .forms import generate_survey_form
-from .models import db, UserRatings, RatingCategory, Notification  # Adjust the import as per your project structure
+from .models import db, UserRatings, RatingCategory, Notification, TennisEvent, Match, School  # Adjust the import as per your project structure
 
 
 #A Blueprint simply allows you to create seperate files from the standard app.py
@@ -124,19 +125,64 @@ def submit_survey():
 ###################################################################################################
 
 
+######################## GETTING the USERS UPCOMING FIXTURES ###################################
+    #################################################################################
 
 
+def get_opponent_name(home_away, home_venue_id, away_venue_id):
+    opponent_id = away_venue_id if home_away == 'Home' else home_venue_id
+    opponent = School.query.filter_by(id=opponent_id).first()
+    return opponent.name if opponent else None
+
+def add_opponent_name_to_fixtures(fixtures):
+    for fixture in fixtures:
+        fixture['opponent_name'] = get_opponent_name(
+            fixture['home_or_away'],
+            fixture['home_venue_id'],
+            fixture['away_venue_id']
+        )
+    return fixtures
 
 
+def get_user_upcoming_fixtures():
+    # Assuming current_user is the logged-in user, provided by Flask-Login
+    user_id = current_user.id
+
+    fixtures_query = db.session.query(
+        TennisEvent.date.label('date'),
+        TennisEvent.home_venue_id,
+        TennisEvent.away_venue_id,
+        db.func.count(Match.id).label('number_of_matches'),
+        db.case(
+            (TennisEvent.home_venue_id == 1, 'Home'),
+            else_='Away'
+        ).label('home_or_away')
+    ).join(
+        Match, Match.tennis_event_id == TennisEvent.id
+    ).filter(
+        TennisEvent.date >= datetime.now(),
+        or_(Match.player1_id == user_id, Match.player2_id == user_id)
+    ).group_by(
+        TennisEvent.id
+    ).all()
+
+    fixtures = [
+        {
+            'date': fixture.date,
+            'number_of_matches': fixture.number_of_matches,
+            'home_or_away': fixture.home_or_away,
+            'opponent_name': '',  # Placeholder, to be filled in later
+            'home_venue_id': fixture.home_venue_id,
+            'away_venue_id': fixture.away_venue_id
+        }
+        for fixture in fixtures_query
+    ]
+
+    return add_opponent_name_to_fixtures(fixtures)
 
 
-
-
-
-
-
-
-
+######################## GETTING the USERS UPCOMING FIXTURES ###################################
+    ############################# FINISHED #######################################
 
 
 
@@ -145,8 +191,10 @@ def submit_survey():
 @login_required
 @role_required('Player')
 def playerdashboard():
-    CoachID = 2 #This is the coachesID
+    CoachID = 1 #This is the coachesID
     role = session.get('role', 'Player')  # Default to 'Player' if not set
+
+    user_upcoming_fixtures = get_user_upcoming_fixtures()
 
     user = User.query.get(current_user.id)
     survey_completed = user.survey_completed
@@ -222,4 +270,4 @@ def playerdashboard():
         # Append to the final data structure
         players_rating_data.append({'Category': category, 'Value': adjusted_values, 'Date': unique_dates})
 
-    return render_template('playerdash.html', survey_completed=survey_completed, form=form, ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, players_rating_data=players_rating_data, categories=categories, user_notifications=user_notifications, user=current_user)
+    return render_template('playerdash.html', survey_completed=survey_completed, user_upcoming_fixtures=user_upcoming_fixtures, form=form, ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, players_rating_data=players_rating_data, categories=categories, user_notifications=user_notifications, user=current_user)
