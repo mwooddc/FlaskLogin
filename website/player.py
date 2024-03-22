@@ -188,30 +188,56 @@ def get_user_upcoming_fixtures():
 
 
 
+
 def player_and_coach_ratings():
     # Get the current player's ID
     player_id = current_user.id
+    coach_id = 1
     
     # Retrieve self-assessed ratings for the player
     self_assessed_ratings = {}
-    self_assessed_query = UserRatings.query.filter_by(Rateeid=player_id)
+    self_assessed_query = UserRatings.query.filter(
+        UserRatings.Rateeid == player_id,
+        UserRatings.Raterid != coach_id  # Exclude coach ratings
+    )
     for rating in self_assessed_query:
         category_description = RatingCategory.query.get(rating.RatingCategory).CategoryDescription
         self_assessed_ratings[category_description] = rating.Value
     
     # Retrieve coach ratings for the player (latest rating for each category)
     coach_ratings = {}
-    coach_query = db.session.query(UserRatings).\
-        filter(UserRatings.Rateeid == player_id).\
-        filter(UserRatings.Raterid != player_id).\
-        group_by(UserRatings.RatingCategory).\
-        having(db.func.max(UserRatings.date_created)).\
-        all()
-    for rating in coach_query:
-        category_description = RatingCategory.query.get(rating.RatingCategory).CategoryDescription
-        coach_ratings[category_description] = rating.Value
+    for rating in RatingCategory.query.all():
+        latest_coach_rating = UserRatings.query.filter(
+            UserRatings.Rateeid == player_id,
+            UserRatings.Raterid == coach_id,
+            UserRatings.RatingCategory == rating.CategoryCode
+        ).order_by(UserRatings.date_created.desc()).first()
+        
+        if latest_coach_rating:
+            category_description = rating.CategoryDescription
+            coach_ratings[category_description] = latest_coach_rating.Value
+
+    print("SELLLLLF", self_assessed_ratings)
+    print("CCCOOOACCCH", coach_ratings)
 
     return self_assessed_ratings, coach_ratings
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -302,6 +328,8 @@ def playerdashboard():
 
 
     player_ratings, coach_ratings = player_and_coach_ratings()
+    print("PPPPPPPPPPPPPPPPPPPPPPPP", player_ratings)
+    print("CCCCCCCCCCCCCCCCCCCCC", coach_ratings)
 
 
 

@@ -12,7 +12,7 @@
     <!-- PANEL ONE -->
     <div class="col-lg-4 mb-4">
       <div class="card">
-        <div class="card-body">
+        <div class="card-body" style="max-height: 250px; overflow-y: auto;">
           <h5 class="card-title">Notifications</h5>
 
             <table id="notificationsTable" class="table table-striped" style="width:100%">
@@ -29,7 +29,7 @@
                   <tr id="notificationRow_{{ notification.id }}">
                       <td>{{ notification.timestamp.strftime('%d-%m-%Y') }}</td>
                       <td>{{ notification['sender_name'] }}</td>
-                      <td>{{ notification.comment[:10] + '...' if notification.comment|length > 210 else notification.comment }}</td>
+                      <td>{{ notification.comment[:10] + '...' if notification.comment|length > 10 else notification.comment }}</td>
                       <td><button type="button" class="btn pink-btn btn-notifications" data-notification-id="{{ notification.id }}" data-sender-id="{{ notification.sender_id }}" data-date="{{ notification.timestamp }}" data-name="{{ notification.sender_name }}" data-message="{{ notification.comment }}" onclick="openModal(this)">View</button></td>
                     </tr>
                   {% endfor %}
@@ -79,7 +79,7 @@
     <!-- PANEL THREE -->
     <div class="col-lg-4 mb-4">
       <div class="card">
-        <div class="card-body">
+        <div class="card-body" style="max-height: 250px; overflow-y: auto;">
           <h5 class="card-title">Latest Coach Ratings</h5>
           <table id="example" class="table table-striped" style="width:100%">
               <tr>
@@ -377,8 +377,6 @@
   var playerData = Object.values(playerRatings);
   const randomColor1 = '#' + (Math.random().toString(16) + '000000').substring(2, 8); // Generate random color
   const randomColor2 = '#' + (Math.random().toString(16) + '000000').substring(2, 8); // Generate random color
-
-
   var coachData = categories.map(function(category) {
       return coachRatings[category] || null; // Handle missing coach ratings
   });
