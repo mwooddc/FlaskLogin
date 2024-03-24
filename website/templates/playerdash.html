@@ -30,7 +30,10 @@
                       <td>{{ notification.timestamp.strftime('%d-%m-%Y') }}</td>
                       <td>{{ notification['sender_name'] }}</td>
                       <td>{{ notification.comment[:10] + '...' if notification.comment|length > 10 else notification.comment }}</td>
-                      <td><button type="button" class="btn pink-btn btn-notifications" data-notification-id="{{ notification.id }}" data-sender-id="{{ notification.sender_id }}" data-date="{{ notification.timestamp }}" data-name="{{ notification.sender_name }}" data-message="{{ notification.comment }}" onclick="openModal(this)">View</button></td>
+                      <td><button type="button" class="btn pink-btn btn-notifications" data-notification-id="{{ notification.id }}" 
+                        data-sender-id="{{ notification.sender_id }}" data-date="{{ notification.timestamp }}" 
+                        data-name="{{ notification.sender_name }}" data-message="{{ notification.comment }}" 
+                        onclick="openModal(this)">View</button></td>
                     </tr>
                   {% endfor %}
               </tbody>
@@ -178,6 +181,11 @@
   </form>
 </sl-dialog>
 
+
+
+
+
+
 <!-- Survey MODAL -->
 {% if form %}
   {% if not survey_completed %}
@@ -264,7 +272,7 @@
 
 
 
-
+<!-- ########################## PLAYER RATINGS GRAPH PREPERATION ################# -->
 
 
 <script>
@@ -318,6 +326,8 @@
 
 
 
+<!-- ########################## PLAYER RATINGS GRAPH PREPERATION ################# -->
+
 
 
 <script>
@@ -325,6 +335,10 @@
       $('#notificationsTable').DataTable();
   } );
 </script>
+
+
+
+<!-- ############################### JavaScript for Notifications Modal ################################ -->
 
 
 <script>
@@ -365,6 +379,11 @@
     });
   }
 </script>
+
+
+<!-- ####################### JavaScript for Notifications Modal FINISH ######################################### -->
+
+
 
 
 <script>

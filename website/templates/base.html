@@ -6,6 +6,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <!-- JAVASCRIPT -->
   <script src="{{url_for('static', filename='js/settings.js') }}"></script>
@@ -99,7 +100,7 @@
 
           <!-- ALL USERS LOGGED IN: -->
           <li class="nav-item">
-            <a class="nav-link" href="#">Notifications<sl-badge variant="danger" pill pulse>{{ unread_notifications_count }}</sl-badge> <i class="fas fa-bell"></i></a><!-- Remove Word Pulse if you don't want flashing: -->
+            <a class="nav-link" href="/all_notifications">Notifications<sl-badge variant="danger" pill pulse>{{ unread_notifications_count }}</sl-badge> <i class="fas fa-bell"></i></a><!-- Remove Word Pulse if you don't want flashing: -->
 
           </li>
 

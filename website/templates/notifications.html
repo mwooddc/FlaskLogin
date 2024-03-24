@@ -1,0 +1,183 @@
+    {% extends "base.html" %}
+    {% block content %}
+
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+    <body style="background-image: none;" class="light-mode"></body>
+    <div id="flash-messages" class="container mt-3"></div>
+
+
+    <!-- {{notifications}} -->
+    
+    <table id="notificationsTable" class="display">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Sender</th>
+                <th>Message Preview</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for notification in notifications %}
+            <tr class="{{ 'bold-text' if not notification.is_read else '' }}">
+                <td>{{ notification.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ notification['sender_name'] }}</td>
+                <td>{{ notification.comment[:50] }}...</td>
+                <td>
+                    <button type="button" class="btn pink-btn btn-notifications view-btn" 
+                    data-notification-id="{{ notification.id }}" 
+                    data-sender-id="{{ notification.sender_id }}" 
+                    data-date="{{ notification.timestamp }}" 
+                    data-name="{{ notification.sender_name }}" 
+                    data-is-read="{{ notification.is_read }}"
+                    data-message="{{ notification.comment }}">
+                    View</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+      <!-- Notifications MODAL -->
+    <sl-dialog id="reply_modal" label="Notification Details">
+        <span class="bold-text">Date|Time: </span><span id="notificationDate"></span></br>
+        <span class="bold-text">Sender: </span><span id="notificationSender"></span></br>
+        <span class="bold-text">IsRead: </span><span id="notificationIsRead"></span></br>
+
+        <span class="bold-text">originalSenderId: </span><span id="originalSenderId"></span></br>
+
+
+        <span class="bold-text">Message:</span></br><span id="notificationMessage"></span></br></br>
+
+
+
+        <form id="replyForm" method="POST" action="{{ url_for('views.all_reply_to_notification') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="original_notification_id" id="originalNotificationId">
+        <input type="hidden" name="receiver_id" id="receiverId">
+        <sl-textarea name="reply_message" id="reply_message" placeholder="Your reply..."></sl-textarea></br>
+        <button type="submit" class="btn pink-btn btn-notifications">Send Reply</button>
+        </form>
+    </sl-dialog>
+
+
+
+    <!-- ######## This script is making the table sort and searchable -->
+    <script>
+$(document).ready(function() {
+        $('#notificationsTable').DataTable();
+
+        $('.view-btn').click(function() {
+        var notificationId = $(this).data('notification-id');
+        console.log(notificationId);
+        var senderid = $(this).data('sender-id');
+        console.log(senderid);
+        var notificationDate = $(this).data('date');
+        console.log(notificationDate);
+        var senderName = $(this).data('name');
+        console.log(senderName);
+        var isRead = $(this).data('is-read');
+        console.log(isRead);
+        var message = $(this).data('message');
+        console.log(message);
+        
+        
+        // Populate the modal with the notification details
+        // #is val hidden and text not?
+        $('#originalNotificationId').val(notificationId);  ///
+        
+        $('#originalSenderId').text(senderid); ////
+        $('#notificationDate').text(notificationDate); //
+        $('#notificationSender').text(senderName); //
+        $('#notificationIsRead').text(isRead); //
+        $('#notificationMessage').text(message); //
+        
+        
+
+        
+        // Shoelace way to show the dialog
+        document.getElementById('reply_modal').show();
+
+        // Check if the notification hasn't been marked as read yet
+        if (!isRead) {
+            $.ajax({
+                url: '/all_mark_notification_as_read/' + notificationId, // Specify your endpoint
+                method: 'POST',
+                data: JSON.stringify({'notificationId': notificationId}), // Ensure you are sending the expected data
+                contentType: "application/json; charset=utf-8",
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', $('meta[name="csrf-token"]').attr('content'));
+                },
+                success: function(response) {
+                    // Update UI to reflect that the notification is now read
+                    // For example, remove the 'font-weight-bold' class from the row
+                    $('button[data-id="' + notificationId + '"]').closest('tr').removeClass('font-weight-bold');
+                    // Update the isRead data attribute
+                    $('button[data-id="' + notificationId + '"]').data('is-read', true);
+                },
+                error: function(error) {
+                    console.error('Error marking notification as read:', error);
+                }
+            });
+        }
+    });
+});
+
+    </script>
+
+
+
+
+<script>
+    $(document).ready(function() {
+        $('#replyForm').on('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting in the traditional way
+    
+            var originalNotificationId = $('#originalNotificationId').val(); // Hidden input field containing the original notification ID
+            console.log("Original Notification ID:", originalNotificationId); // C
+            var replyMessage = $('#reply_message').val(); // User's reply message
+            console.log("Message is:", replyMessage); // C
+    
+            // Construct the payload to include the original notification ID and the reply message
+            var payload = {
+                original_notification_id: originalNotificationId,
+                reply_message: replyMessage
+            };
+    
+            $.ajax({
+                url: '/all_reply_to_notification', // Update to match your Flask route
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(payload),
+                dataType: 'json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', $('input[name="csrf_token"]').val()); // Ensure CSRF token is included
+                },
+                success: function(response) {
+                    document.getElementById('reply_modal').hide();
+                    $('#flash-messages').html('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                                            'Reply sent successfully!');
+
+                    // Optional: Auto-hide the flash message after a few seconds
+                    setTimeout(function() { 
+                        $('.alert').alert('close'); 
+                    }, 5000);
+                    
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors
+                    console.error('Error submitting reply:', error);
+                    console.log(xhr.responseText); // Log the full server response
+                    alert('Error submitting reply. Please try again.');
+                }
+            });
+        });
+    });
+    </script>
+
+    {% endblock %}
+    

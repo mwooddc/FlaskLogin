@@ -84,3 +84,10 @@ def create_app():
 #         print("Created database!")
 
 
+# @app.context_processor
+# def inject_unread_notifications_count():
+#     if current_user.is_authenticated:
+#         unread_count = Notification.query.filter_by(receiver_id=current_user.id, is_read=False).count()
+#     else:
+#         unread_count = 0
+#     return dict(unread_notifications_count=unread_count)

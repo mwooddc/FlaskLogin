@@ -4,6 +4,7 @@ from .models import db, User, UserRatings, RatingCategory, School, Notification
 from sqlalchemy import func
 from .forms import LoginForm
 from faker import Faker
+from flask import jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
 from datetime import datetime, timedelta
@@ -216,3 +217,85 @@ def populate_users():
     db.session.commit()
     flash('Users populated successfully!', 'success')
     return render_template("passwords.html", passwords=passwords, user=current_user)
+
+
+
+
+#### routes required for Notifications Page ####
+#################################################
+
+
+@views.route('/all_notifications')
+@login_required
+def all_notifications():
+    # user_notifications = Notification.query.filter_by(receiver_id=current_user.id).order_by(Notification.timestamp.desc()).all()
+    
+    notifications = Notification.query.filter_by(receiver_id=current_user.id).order_by(Notification.timestamp.desc()).all()
+    # # Option 1: Return a list of comments/messages
+    # comments = [notification.comment for notification in notifications]
+    # return comments
+
+    # Option 2: Return a list of dictionaries with more details
+    detailed_notifications = [{
+        'id': notification.id,
+        'comment': notification.comment,
+        'match_id': notification.match_id,
+        'sender_id': notification.sender_id,  # Include sender_id if you want to show who sent the notification
+        'sender_name': f"{notification.sender.Forename} {notification.sender.Surname}",  # Access sender's name via relationship
+        'is_read': notification.is_read,
+        'timestamp': notification.timestamp
+    } for notification in notifications]
+    
+    return render_template('notifications.html', notifications=detailed_notifications, user=current_user)
+
+
+
+@views.route('/all_mark_notification_as_read/<int:notification_id>', methods=['POST'])
+@login_required
+def all_mark_notification_as_read(notification_id):
+    notification = Notification.query.filter_by(id=notification_id, receiver_id=current_user.id).first()
+    if notification:
+        notification.is_read = True
+        db.session.commit()
+        return jsonify({'success': 'Notification marked as read'}), 200
+    return jsonify({'error': 'Notification not found'}), 404
+
+
+
+
+
+
+
+@views.route('/all_reply_to_notification', methods=['POST'])
+@login_required
+def all_reply_to_notification():
+    data = request.get_json()
+
+    original_notification_id = data.get('original_notification_id')
+    reply_message = data.get('reply_message')
+
+    # Fetch the original notification to derive receiver_id and to mark it as read
+    original_notification = Notification.query.get(original_notification_id)
+    if not original_notification:
+        return jsonify({'error': 'Original notification not found'}), 404
+    
+    # Assuming you want to reply to the sender of the original notification
+    receiver_id = original_notification.sender_id
+
+    original_notification.is_read = True  # Mark the original notification as read
+
+    # Create the reply notification
+    reply_notification = Notification(
+        receiver_id=receiver_id,
+        sender_id=current_user.id,  # The ID of the currently logged-in user
+        comment=reply_message,
+        is_read=False  # New notifications are unread by default
+    )
+    
+    db.session.add(reply_notification)
+    db.session.commit()
+
+    return jsonify({'success': 'Reply submitted successfully'}), 200
+
+#### routes required for Notifications Page ####
+################## FINSIHED #########################

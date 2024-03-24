@@ -367,7 +367,12 @@ def coachdashboard():
     # Note: We append a '0' that we'll remove in the template to ensure Flask processes this route correctly.
 
 
-    return render_template('coachdash.html', user_notifications=user_notifications, base_get_player_ratings_url=base_get_player_ratings_url, players=players, categories=categories, recent_results=recent_results, upcoming_fixtures=enriched_fixtures, player_ratings_labels=player_ratings_labels, player_ratings_datasets=player_ratings_datasets, total_recent_player_ratings_labels=total_recent_player_ratings_labels, total_recent_player_ratings_datasets=total_recent_player_ratings_datasets, user=current_user)
+    return render_template('coachdash.html', user_notifications=user_notifications, \
+                           base_get_player_ratings_url=base_get_player_ratings_url, \
+                           players=players, categories=categories, recent_results=recent_results, \
+                           upcoming_fixtures=enriched_fixtures, player_ratings_labels=player_ratings_labels, \
+                           player_ratings_datasets=player_ratings_datasets, total_recent_player_ratings_labels=total_recent_player_ratings_labels, \
+                           total_recent_player_ratings_datasets=total_recent_player_ratings_datasets, user=current_user)
 
 
 
