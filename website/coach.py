@@ -6,6 +6,7 @@ from .auth import role_required
 from datetime import datetime
 from flask import jsonify
 import re
+from sqlalchemy import func, case, or_, desc
 
 
 #A Blueprint simply allows you to create seperate files from the standard app.py
@@ -17,19 +18,377 @@ import re
 coach = Blueprint("coach", __name__)
 
 
-# @views.route("/")
-@coach.route("/coach")
+############# HANDLING NOTIFICATIONS ##############################################################
+
+def get_user_notifications(user_id):
+    notifications = Notification.query.filter_by(receiver_id=user_id, is_read=False).order_by(Notification.timestamp.desc()).limit(5).all()
+    # # Option 1: Return a list of comments/messages
+    # comments = [notification.comment for notification in notifications]
+    # return comments
+
+    # Option 2: Return a list of dictionaries with more details
+    detailed_notifications = [{
+        'id': notification.id,
+        'comment': notification.comment,
+        'match_id': notification.match_id,
+        'sender_id': notification.sender_id,  # Include sender_id if you want to show who sent the notification
+        'sender_name': f"{notification.sender.Forename} {notification.sender.Surname}",  # Access sender's name via relationship
+        'is_read': notification.is_read,
+        'timestamp': notification.timestamp
+    } for notification in notifications]
+    return detailed_notifications
+
+
+
+
+@coach.route('/mark-notifications-read/<int:notification_id>', methods=['POST'])
 @login_required
 @role_required('Coach')
-def mates():
-    # Check the user's role and pass it to the template
-    role = session.get('role', 'Coach')  # Default to 'Player' if not set
+def mark_notifications_read(notification_id):
+    notification = Notification.query.get(notification_id)
+    if notification and notification.receiver_id == current_user.id:  # Check that the notification exists and belongs to the current user
+        notification.is_read = True
+        db.session.commit()
+        return jsonify({"success": True}), 200
+    return jsonify({"error": "Notification not found or access denied"}), 404
 
-    #here the user variable stores the current user which if it exists i.e.
-    # you are logged in, is an object containing the users record
-    # we can then inside home.html use jinja to access the users fields
-    #e.g. id, username, email {{ current_user.username }}
-    return render_template("coach.html", user=current_user)
+
+
+#This route can not be the same name as the route in the player.py
+@coach.route('/reply_to_notifications', methods=['POST'])
+@login_required
+@role_required('Coach')
+def reply_to_notifications():
+    original_notification_id = request.form.get('original_notification_id')
+    receiver_id = request.form.get('receiver_id')
+    reply_message = request.form.get('reply_message')
+
+    # Mark the original notification as read
+    original_notification = Notification.query.get(original_notification_id)
+    if original_notification:
+        original_notification.is_read = True
+
+    # Create the reply notification
+    reply_notification = Notification(
+        receiver_id=receiver_id,
+        sender_id=current_user.id,  # Assuming you have access to the currently logged-in user's ID
+        comment=reply_message,
+        is_read=False
+    )
+    db.session.add(reply_notification)
+    db.session.commit()
+
+    return redirect(url_for('coach.coachdashboard'))  # Redirect to the notifications page or wherever appropriate
+
+
+
+############# HANDLING NOTIFICATIONS FINISHED #####################################################
+###################################################################################################
+
+
+
+
+############# Upcoming Fixtures #####################################################
+#####################################################################################
+
+
+
+# Assuming `db` is your SQLAlchemy instance and session
+def get_upcoming_fixtures():
+    fixtures_query = db.session.query(
+        TennisEvent.date.label('date'),
+        TennisEvent.home_venue_id,
+        TennisEvent.away_venue_id,
+        db.func.count(Match.id).label('number_of_matches'),
+        db.case(
+            (TennisEvent.home_venue_id == 1, 'Home'),
+            else_='Away'
+        ).label('home_or_away')
+    ).join(
+        Match, Match.tennis_event_id == TennisEvent.id
+    ).filter(
+        TennisEvent.date >= datetime.now(),
+        or_(TennisEvent.home_venue_id == 1, TennisEvent.away_venue_id == 1)
+    ).group_by(TennisEvent.id).all()
+
+    return [
+        {
+            'date': fixture.date,
+            'number_of_matches': fixture.number_of_matches,
+            'home_or_away': fixture.home_or_away,
+            'opponent_name': '',  # Placeholder, to be filled in later
+            'home_venue_id': fixture.home_venue_id,
+            'away_venue_id': fixture.away_venue_id
+        }
+        for fixture in fixtures_query
+    ]
+
+def get_opponent_name(home_away, home_venue_id, away_venue_id):
+    opponent_id = away_venue_id if home_away == 'Home' else home_venue_id
+    opponent = School.query.filter_by(id=opponent_id).first()
+    return opponent.name if opponent else None
+
+def add_opponent_name_to_fixtures(fixtures):
+    for fixture in fixtures:
+        fixture['opponent_name'] = get_opponent_name(
+            fixture['home_or_away'],
+            fixture['home_venue_id'],
+            fixture['away_venue_id']
+        )
+    return fixtures
+
+
+# `fixtures` will be a list of tuples with the structure (date, home_or_away, opponent, number_of_matches)
+
+
+############# Upcoming Fixtures FINSIHED #####################################################
+##############################################################################################
+
+
+############# Recent Results  #####################################################
+##############################################################################################
+
+
+
+def get_recent_results():
+    recent_events = TennisEvent.query.filter(
+        or_(TennisEvent.home_venue_id == 1, TennisEvent.away_venue_id == 1),
+        TennisEvent.date < datetime.utcnow()  # Adjust timezone as necessary
+    ).order_by(desc(TennisEvent.date)).limit(5).all()
+
+    results = []
+    for event in recent_events:
+        home_or_away = 'Home' if event.home_venue_id == 1 else 'Away'
+        opponent_id = event.away_venue_id if home_or_away == 'Home' else event.home_venue_id
+        opponent = School.query.get(opponent_id)
+
+        # Directly count the number of matches for this event
+        number_of_matches = len(event.matches)
+
+        # Assume wins and losses calculation is corrected here
+        wins = sum(1 for match in event.matches if match.won_or_lost == 'Won')
+        losses = sum(1 for match in event.matches if match.won_or_lost == 'Lost')
+
+        results.append({
+            'date': event.date.strftime('%Y-%m-%d'),
+            'opponent_name': opponent.name if opponent else 'Unknown',
+            'home_or_away': home_or_away,
+            'wins': wins,
+            'losses': losses,
+            'number_of_matches': number_of_matches,
+        })
+
+    return results
+
+
+############# Recent Results FINISHED #####################################################
+##############################################################################################
+
+
+
+
+################## Prepare data for Player Combined Category Scores Graph  ########################################
+#####################################################################################################################
+
+
+def every_player_ratings_chart():
+    # Step 1: SQL Query Adjustment
+    CoachID = 1
+    
+    # Adjusted query
+    latest_user_category_ratings = db.session.query(
+        UserRatings.Rateeid,
+        UserRatings.RatingCategory,
+        func.max(UserRatings.date_created).label('latest_date')
+    ).join(
+        User, UserRatings.Rateeid == User.id  # Explicit join condition
+    ).filter(
+        User.Role == 'Player',
+        UserRatings.Raterid == CoachID # So only the coach ratings
+    ).group_by(
+        UserRatings.Rateeid,
+        UserRatings.RatingCategory
+    ).subquery('latest_ratings')
+
+    # Assuming the ambiguous join was in the main query fetching the latest ratings' values
+    latest_ratings_query = db.session.query(
+        User.id,
+        User.Username,
+        RatingCategory.CategoryDescription,
+        UserRatings.Value,
+        latest_user_category_ratings.c.latest_date
+    ).select_from(UserRatings).join(
+        User, UserRatings.Rateeid == User.id  # Starting from UserRatings, joining to User
+    ).join(
+        latest_user_category_ratings, 
+        (UserRatings.Rateeid == latest_user_category_ratings.c.Rateeid) &
+        (UserRatings.date_created == latest_user_category_ratings.c.latest_date) &
+        (UserRatings.RatingCategory == latest_user_category_ratings.c.RatingCategory)
+    ).join(
+        RatingCategory, UserRatings.RatingCategory == RatingCategory.CategoryCode
+    ).order_by(User.Username).all()
+    
+    # Step 2: Data Structuring for Chart.js
+    
+    user_data = {}
+    for user_id, username, category_description, value, latest_date in latest_ratings_query:
+        if username not in user_data:
+            user_data[username] = {'total': 0, 'categories': {}}
+        
+        user_data[username]['categories'][category_description] = value
+        user_data[username]['total'] += value
+
+    labels = list(user_data.keys())
+    datasets = []
+    category_list = [cat.CategoryDescription for cat in RatingCategory.query.all()]
+    for category in category_list:
+        dataset = {
+            'label': category,
+            'data': [],
+            'backgroundColor': "assign_a_unique_color",  # Placeholder for color assignment
+        }
+        
+        for user, details in user_data.items():
+            dataset['data'].append(details['categories'].get(category, 0))
+        
+        datasets.append(dataset)
+
+    # Passing the structured data to the template
+    return labels, datasets
+
+
+##################  FINISHED ########################################
+#######################################################################################
+
+
+################## Prepare data for Upcoming Training Sessions Graph  ########################################
+#####################################################################################################################
+
+
+def total_score_player_ratings_chart():
+    CoachID = 1
+    # Adjusted query with Forename
+    latest_user_category_ratings = db.session.query(
+        UserRatings.Rateeid,
+        UserRatings.RatingCategory,
+        func.max(UserRatings.date_created).label('latest_date')
+    ).join(
+        User, UserRatings.Rateeid == User.id
+    ).filter(
+        User.Role == 'Player',
+        UserRatings.Raterid == CoachID # So only the coach ratings
+    ).group_by(
+        UserRatings.Rateeid,
+        UserRatings.RatingCategory
+    ).subquery('latest_ratings')
+
+    latest_ratings_query = db.session.query(
+        User.Forename,  # Assuming Forename is the desired label
+        func.sum(UserRatings.Value).label('total_value')
+    ).select_from(UserRatings).join(
+        User, UserRatings.Rateeid == User.id
+    ).join(
+        latest_user_category_ratings,
+        (UserRatings.Rateeid == latest_user_category_ratings.c.Rateeid) &
+        (UserRatings.date_created == latest_user_category_ratings.c.latest_date) &
+        (UserRatings.RatingCategory == latest_user_category_ratings.c.RatingCategory)
+    ).join(
+        RatingCategory, UserRatings.RatingCategory == RatingCategory.CategoryCode
+    ).group_by(User.Forename).order_by(User.Forename).all()
+    
+    # Prepare data for Chart.js
+    labels = [result.Forename for result in latest_ratings_query]
+    totals = [result.total_value for result in latest_ratings_query]
+
+    datasets = [{
+        'label': 'Total Ratings',
+        'data': totals,
+        'backgroundColor': 'rgba(255, 99, 132, 0.2)',
+        'borderColor': 'rgba(255, 99, 132, 1)',
+        'borderWidth': 1
+    }]
+
+    return labels, datasets
+
+
+##################  FINISHED ########################################
+#######################################################################################
+
+
+
+
+
+def player_ratings_graph():
+    players = User.query.filter_by(Role='Player').all()
+    categories = RatingCategory.query.all()
+    categories=[c.CategoryDescription for c in categories]
+    return players, categories
+
+
+
+###### Latest Individual Player Ratings Graph #########
+
+@coach.route('/get_player_ratings/<int:player_id>')
+@login_required
+@role_required('Coach')
+def get_player_ratings(player_id):
+    CoachID = 1
+    ratings = UserRatings.query.filter(
+        UserRatings.Rateeid==player_id,
+        UserRatings.Raterid == CoachID
+        ).all()
+    ratings_data = {}
+    for rating in ratings:
+        category_desc = RatingCategory.query.get(rating.RatingCategory).CategoryDescription
+        ratings_data[category_desc] = rating.Value
+    return jsonify(ratings_data)
+
+
+###### Latest Individual Player Ratings Graph FINISHED #########
+
+
+
+
+
+@coach.route('/coachdashboard', methods=['GET', 'POST'])
+@login_required
+@role_required('Coach')
+def coachdashboard():
+    print("MADE IT")
+    user_notifications = get_user_notifications(current_user.id)
+    fixtures = get_upcoming_fixtures()
+    enriched_fixtures = add_opponent_name_to_fixtures(fixtures)
+    total_recent_player_ratings_labels, total_recent_player_ratings_datasets = total_score_player_ratings_chart()
+    player_ratings_labels, player_ratings_datasets = every_player_ratings_chart()
+    recent_results = get_recent_results()
+    players, categories = player_ratings_graph()
+    # Inside your coachdashboard function, before returning the render_template call
+    base_get_player_ratings_url = url_for('coach.get_player_ratings', player_id=0)[:-1]
+    # Note: We append a '0' that we'll remove in the template to ensure Flask processes this route correctly.
+
+
+    return render_template('coachdash.html', user_notifications=user_notifications, \
+                           base_get_player_ratings_url=base_get_player_ratings_url, \
+                           players=players, categories=categories, recent_results=recent_results, \
+                           upcoming_fixtures=enriched_fixtures, player_ratings_labels=player_ratings_labels, \
+                           player_ratings_datasets=player_ratings_datasets, total_recent_player_ratings_labels=total_recent_player_ratings_labels, \
+                           total_recent_player_ratings_datasets=total_recent_player_ratings_datasets, user=current_user)
+
+
+
+
+
+
+
+
+def count_unread_notifications(user_id):
+    count = Notification.query.filter_by(receiver_id=user_id, is_read=False).count()
+    return count
+
+
+
+
+
 
 
 @coach.route('/submit-rating', methods=['GET', 'POST'])
@@ -217,13 +576,15 @@ def create_event_and_matches():
                 if match_data['comment'].strip():  # Check if comment is not just whitespace
                     for player_id in [match.player1_id, match.player2_id]:
                         # Ensure player_id is valid and not None before creating a notification
-                        if player_id:  # player_id should already be an integer, but ensure it's not None
+                        if player_id and player_id != current_user.id:  # Ensure the player is not the sender
                             notification = Notification(
-                                user_id=player_id,
-                                match_id=match.id,  # Now match.id is available
+                                receiver_id=player_id,
+                                sender_id=current_user.id,  # Current logged-in user as the sender
+                                match_id=match.id,
                                 comment=match_data['comment'],
                                 is_read=False
-                            )
+                            )                        
+
                             db.session.add(notification)
 
 
@@ -236,3 +597,13 @@ def create_event_and_matches():
             # return render_template('create_event_and_matches.html', errors=errors, user=current_user, event=event, schools=schools)
 
     return render_template('create_event_and_matches.html', user=current_user, schools=schools, players=players_dict)
+
+
+
+
+
+
+
+
+
+

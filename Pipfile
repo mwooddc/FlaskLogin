@@ -12,6 +12,7 @@ flask-wtf = "*"
 wtforms = "*"
 faker = "*"
 sqlalchemy-utils = "*"
+email-validator = "*"
 
 [dev-packages]
 

@@ -28,6 +28,7 @@ class User(db.Model, UserMixin):
     Forename = db.Column(db.String(255), nullable=False)
     Surname = db.Column(db.String(255), nullable=False)
     Role = db.Column(db.String(50), nullable=False)  # 'Player' or 'Coach'
+    survey_completed = db.Column(db.Boolean, default=False, nullable=False)
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
     # Relationships
     
@@ -64,15 +65,17 @@ class Match(db.Model, UserMixin):
 class Notification(db.Model, UserMixin):
     __tablename__ = 'notifications'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    match_id = db.Column(db.Integer, db.ForeignKey('matches.id'), nullable=False)
-    comment = db.Column(db.Text, nullable=False)  # You might store the comment text or an identifier
+    receiver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Recipient
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Sender
+    match_id = db.Column(db.Integer, db.ForeignKey('matches.id'), nullable=True)
+    comment = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False, nullable=False)
     timestamp = db.Column(db.DateTime(timezone=True), default=func.now())
 
-    user = db.relationship('User', backref='notifications')
+    # Relationships
+    receiver = db.relationship('User', foreign_keys=[receiver_id], backref='notifications_received')
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='notifications_sent')
     match = db.relationship('Match', backref='notifications')
-
 
 
 
@@ -90,7 +93,6 @@ class TennisEvent(db.Model, UserMixin):
     away_venue_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)#### needs to be HOME venue ID and AWAY venue ID
     # Define the relationship with the School model for the home venue
     home_venue = db.relationship('School', foreign_keys=[home_venue_id], backref='home_events')
-    
     # Define the relationship with the School model for the away venue
     away_venue = db.relationship('School', foreign_keys=[away_venue_id], backref='away_events')
 
@@ -149,3 +151,9 @@ class SessionAttendance(db.Model, UserMixin):
 #     TeamName = db.Column(db.String(255), db.ForeignKey('teams.TeamName'), primary_key=True)
 #     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
 #     Position = db.Column(db.String(255))
+
+
+
+def count_unread_notifications(user_id):
+    count = Notification.query.filter_by(receiver_id=user_id, is_read=False).count()
+    return count

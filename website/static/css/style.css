@@ -7,6 +7,19 @@ Light Pink: #eba3b1
 Green: #158e6c
 */
 
+.bold-text{
+  font-weight: 700;
+}
+
+.dt-center { text-align: center; }
+
+#fixturesTable .matches-header, #fixturesTable td:nth-child(4) { /* Assuming 'No. of Matches' is the 4th column */
+  text-align: center;
+}
+
+#recentResultsTable .matches-header, #recentResultsTable td:nth-child(3) { /* Assuming 'No. of Matches' is the 4th column */
+  text-align: center;
+}
 
 :root {
   --background-color-light: #FFFFFF; /* White for light mode */

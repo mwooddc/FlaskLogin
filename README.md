@@ -29,4 +29,44 @@ In the auth.py file on line 68 the sha256 method is passed as a parameter but in
 
 Have used https://datatables.net/ for table layout css
 
+# CSRF Form issues
+<!-- If there are any CSRF issues before you do anything, try deleteing this line of code in __init__.py: -->
+    csrf = CSRFProtect(app)
+Then put it back in.
+
+If you have created a Flask-WTF Form then this needs to be put in the form tag: 
+<!-- <form method="POST">
+  {{ form.csrf_token }}
+</form> -->
+If there is no Flask-WTF Form created for the form then you put this in the form tag:
+<!-- <form method="POST">
+  {{ csrf_token() }}
+</form> -->
+
+
 # How to Merge Branches on Git
+Open a Pull Request (PR):
+
+On GitHub, navigate to your repository and go to the "Pull Requests" tab. Click on "New Pull Request."
+Choose your "feature-branch" as the branch you want to merge from and select the main branch as the target branch.
+Review and Discuss:
+
+In the PR, you can review the changes, discuss them with collaborators, and ensure everything is in order before merging.
+Merge the PR:
+
+If the changes are approved and the branch is ready to merge, you can click the "Merge" button on the PR. This will merge your "feature-branch" into the main branch.
+Confirm the Merge:
+
+GitHub will ask you to confirm the merge. You can add a commit message to describe the merge if needed.
+Merge Conflict Resolution (if applicable):
+
+If there are conflicts between your branch and the main branch, you'll need to resolve them. This might involve manually editing the affected files to combine changes.
+Complete the Merge:
+
+Once conflicts are resolved (if any), complete the merge, and your changes from the "feature-branch" are now part of the main branch.
+
+On GitHub you can then delete the branch if you want
+
+>> You will then need to go back into VSCode, resolve any staged files i.e. remove them. Stop the Flask application running (won't work otherwise) then click on the button to pull the changes.
+
+>> MAke sure in VS Code that you are then working on the main branch again

@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask import flash
-from wtforms.validators import InputRequired, DataRequired, NumberRange, ValidationError, Length
-from wtforms import SelectField, StringField, SubmitField, IntegerField, TextAreaField
+from wtforms.validators import InputRequired, DataRequired, NumberRange, ValidationError, Email, EqualTo, Length
+from wtforms import SelectField, StringField, SubmitField, IntegerField, TextAreaField, PasswordField, RadioField
 from .models import User, RatingCategory
 
 class UserRatingForm(FlaskForm):
@@ -12,7 +12,9 @@ class UserRatingForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(UserRatingForm, self).__init__(*args, **kwargs)
         # Populate the ratee dropdown list with user names
-        self.ratee_id.choices = [(user.id, f"{user.Forename} {user.Surname}") for user in User.query.all()]
+        # Query to select only users with the role of 'Player'
+        player_users = User.query.filter_by(Role='Player').all()
+        self.ratee_id.choices = [(user.id, f"{user.Forename} {user.Surname}") for user in player_users]
         # Populate the rating category dropdown list with category names
         self.rating_category.choices = [(category.CategoryCode, category.CategoryDescription) for category in RatingCategory.query.all()]
 
@@ -80,3 +82,29 @@ class MatchForm(FlaskForm):
             raise ValidationError("For Singles, 'None' must be selected for Player 2.")
         elif form.singles_or_doubles_0.data == 'Doubles' and field.data == 'None':
             raise ValidationError("For Doubles, 'None' can NOT be selected for Player 2.")
+
+
+class LoginForm(FlaskForm):
+    Email = StringField('Email', validators=[DataRequired(), Email()], render_kw={"placeholder": "Email", "class": "form-control"})
+    Password = PasswordField('Password', validators=[DataRequired()], render_kw={"placeholder": "Password", "class": "form-control"})
+    submit = SubmitField('Login', render_kw={"class": "btn btn-primary"})
+
+class SignUpForm(FlaskForm):
+    Forename = StringField('Forename', validators=[DataRequired()], render_kw={"placeholder": "Forename"})
+    Surname = StringField('Surname', validators=[DataRequired()], render_kw={"placeholder": "Surname"})
+    Username = StringField('Username', validators=[DataRequired()], render_kw={"placeholder": "Username"})
+    Email = StringField('Email', validators=[DataRequired(), Email()], render_kw={"placeholder": "Email"})
+    Password1 = PasswordField('Password', validators=[DataRequired()], render_kw={"placeholder": "Password"})
+    Password2 = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('Password1', message='Passwords must match')], render_kw={"placeholder": "Re-Enter Password"})
+    Role = RadioField('Role', choices=[('Coach','Coach'), ('Player','Player')], default='Player')
+    submit = SubmitField('Sign Up')
+
+def generate_survey_form():
+    class DynamicSurveyForm(FlaskForm):
+        pass
+
+    for category in RatingCategory.query.all():
+        field_name = f'rating_{category.CategoryCode}'
+        setattr(DynamicSurveyForm, field_name, IntegerField(f'{category.CategoryDescription}', validators=[DataRequired(), NumberRange(min=0, max=10)]))
+
+    return DynamicSurveyForm

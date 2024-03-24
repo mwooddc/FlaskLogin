@@ -1,45 +1,411 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} 
 {% block content%} 
 
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <body style="background-image: none;" class="light-mode">
 
 <!-- Here we use Jinja to get access to the current logged in users object -->
 <div class="container mt-4">
-  <div class="row">
-    <div class="col-lg-4 mb-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Profile Details</h5>
 
-          <h6>You are logged in as:</h6> {{ current_user.Username }} </br>
-          <h6>Your Email Address is:</h6> {{ current_user.Email }} </br>
-          <h6>Your Forename is:</h6> {{ current_user.Forename }} </br>
-          <h6>Your Surname is:</h6> {{ current_user.Surname }} </br>
-          <h6>You Role is:</h6> {{ current_user.Role }} </br>
-        </div>
-      </div>
-    </div>
+  <div class="row">
+
+    <!-- PANEL ONE -->
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Panel 2</h5>
-          <p class="card-text">Content for Panel 2 goes here.</p>
+          <h5 class="card-title">Notifications</h5>
+
+
+          <table id="notificationsTable" class="table table-striped" style="width:100%">
+            <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Sender</th>
+                  <th>Comment</th>
+                  <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for notification in user_notifications %}
+                <tr id="notificationRow_{{ notification.id }}">
+                    <td>{{ notification.timestamp.strftime('%d-%m-%Y') }}</td>
+                    <td>{{ notification['sender_name'] }}</td>
+                    <td>{{ notification.comment[:10] + '...' if notification.comment|length > 10 else notification.comment }}</td>
+                    <td><button type="button" class="btn pink-btn btn-notifications" data-notification-id="{{ notification.id }}" data-sender-id="{{ notification.sender_id }}" data-date="{{ notification.timestamp }}" data-name="{{ notification.sender_name }}" data-message="{{ notification.comment }}" onclick="openModal(this)">View</button></td>
+                  </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
         </div>
       </div>
     </div>
+
+    <!-- PANEL TWO -->
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Panel 3</h5>
-          <p class="card-text">Content for Panel 3 goes here.</p>
+          <h5 class="card-title">Upcoming Fixtures</h5>
+
+
+          <!-- {{upcoming_fixtures}} -->
+          <table id="fixturesTable" class="table table-striped" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Opponent</th>
+                    <th>Venue</th>
+                    <th>No. of Matches</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fixture in upcoming_fixtures %}
+                <tr>
+                    <td>{{ fixture.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ fixture.opponent_name }}</td>
+                    <td>{{ fixture.home_or_away }}</td>
+                    <td class="matches-header">{{ fixture.number_of_matches }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL THREE -->
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Upcoming Training Sessions</h5>
+          <!-- {{total_recent_player_ratings_labels}}</br></br>
+          {{total_recent_player_ratings_datasets}} -->
+          <!-- {{player_ratings_labels}}</br></br>
+          {{player_ratings_datasets}} -->
           <div>
-            <canvas id="myChart"></canvas>
+            <canvas id="latest_ratings_chart"></canvas>
           </div>
           
         </div>
       </div>
     </div>
+
+
+  </div> 
+  <!-- ##### END OF ROW 1 ##### -->
+
+
+
+
+
+
+  <div class="row">
+
+    <!-- PANEL FOUR -->
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Player Combined Category Scores</h5>
+          <!-- {{total_recent_player_ratings_labels}}</br></br>
+          {{total_recent_player_ratings_datasets}} -->
+          <!-- {{player_ratings_labels}}</br></br>
+          {{player_ratings_datasets}} -->
+          <div>
+            <!-- <canvas id="latest_ratings_chart"></canvas> -->
+            <canvas id="players_total_ratings"></canvas>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL FIVE -->
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Recent Results</h5>
+          <!-- {{recent_results}} -->
+
+          <table id="recentResultsTable" class="table table-striped" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Opponent</th>
+                    <th>No. of Matches</th>
+                    <th>Won</th>
+                    <th>Lost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in recent_results %}
+                <tr>
+                    <td>{{ result.date }}</td>
+                    <td>{{ result.opponent_name }}</td>
+                    <td class="matches-header">{{ result.number_of_matches }}</td>
+                    <td>{{ result.wins }}</td>
+                    <td>{{ result.losses }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL SIX -->
+    <div class="col-lg-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Latest Individual Player Ratings</h5>
+          <select id="playerSelect">
+            {% for player in players %}
+            <option value="{{ player.id }}">{{ player.Forename }} {{ player.Surname }}</option>
+            {% endfor %}
+          </select>
+          <canvas id="ratingsChart"></canvas>
+
+          
+        </div>
+      </div>
+    </div>
+
+
   </div>
+
+
+
+
+
 </div>
+
+
+<!-- MODAL -->
+<sl-dialog id="replyModal" label="Notification Details">
+  <span class="bold-text">Date|Time: </span><span id="notificationDate"></span></br>
+  <span class="bold-text">Sender: </span><span id="notificationSender"></span></br>
+  <span class="bold-text">Message:</span></br><span id="notificationMessage"></span></br></br>
+  <form id="replyForm" method="POST" action="{{ url_for('coach.reply_to_notifications') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="original_notification_id" id="originalNotificationId">
+    <input type="hidden" name="receiver_id" id="receiverId">
+    <sl-textarea name="reply_message" placeholder="Your reply..."></sl-textarea></br>
+    <button type="submit" class="btn pink-btn btn-notifications">Send Reply</button>
+  </form>
+</sl-dialog>
+
+
+<script>
+  $(document).ready( function () {
+      $('#notificationsTable').DataTable();
+  } );
+</script>
+
+
+<script>
+  function openModal(button) {
+    const notificationId = button.getAttribute('data-notification-id');
+    const senderId = button.getAttribute('data-sender-id');
+    const message = button.getAttribute('data-message');
+    const date = button.getAttribute('data-date');
+    const name = button.getAttribute('data-name'); // This assumes you're setting data-name attribute in your button
+
+    // Set the content in your modal
+    document.getElementById('notificationMessage').textContent = message;
+    document.getElementById('notificationDate').textContent = date;
+    document.getElementById('notificationSender').textContent = name;
+    document.getElementById('originalNotificationId').value = notificationId;
+    document.getElementById('receiverId').value = senderId;
+
+    document.querySelector('#replyModal').show();
+
+    // Fetch request to mark the notification as read
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch(`/mark-notifications-read/${notificationId}`, {
+      method: 'POST',
+      headers: {
+        "X-CSRFToken": csrfToken,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({}) // No need to send data, but the server might expect a JSON body
+    })
+    .then(response => {
+      if (response.ok) {
+        console.log("Notification marked as read");
+        //remove row from the table
+        document.getElementById(`notificationRow_${notificationId}`).remove();
+      } else {
+        console.error('Failed to mark notification as read');
+      }
+    });
+  }
+</script>
+
+<script>
+$(document).ready(function () {
+    $('#fixturesTable').DataTable({
+        "order": [[0, "asc"]], // Keeps your initial ordering based on the date column.
+        "columnDefs": [
+            {
+                "className": "dt-center", // Apply a class to center-align the text
+                "targets": 3 // Targets the 'No. of Matches' column. Index is based on a zero-based count.
+            }
+        ]
+    });
+});
+</script>
+
+<script>
+  $(document).ready(function() {
+      $('#recentResultsTable').DataTable({
+          "order": [[0, "desc"]] // Orders the table based on the date column in descending order.
+      });
+  });
+  </script>
+
+
+
+<script>
+var ctx = document.getElementById('latest_ratings_chart').getContext('2d');
+var totalRatingsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {{ total_recent_player_ratings_labels | tojson | safe }},
+        datasets: {{ total_recent_player_ratings_datasets | tojson | safe }}
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Total Rating Scores'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Player'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false  // Set to true if you want to display the dataset label
+            }
+        }
+    }
+});
+</script>
+
+
+
+
+<script>
+  // Assuming you have a predefined array of colors
+  var colors = [
+      'rgba(255, 99, 132, 0.2)',
+      'rgba(54, 162, 235, 0.2)',
+      'rgba(255, 206, 86, 0.2)',
+      'rgba(75, 192, 192, 0.2)',
+      'rgba(153, 102, 255, 0.2)',
+      'rgba(255, 159, 64, 0.2)',
+      // Add more colors as needed
+  ];
+  
+  // Using Jinja2 to insert Flask variables into JavaScript
+  var playerLabels = {{ player_ratings_labels|tojson }};
+  var playerDatasets = {{ player_ratings_datasets|tojson }};
+  
+  // Assign a color to each dataset from the predefined array
+  for (let i = 0; i < playerDatasets.length; i++) {
+      playerDatasets[i].backgroundColor = colors[i % colors.length]; // Cycle through colors if not enough
+  }
+  
+  var ctx = document.getElementById('players_total_ratings').getContext('2d');
+  var myChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels: playerLabels,
+          datasets: playerDatasets
+      },
+      options: {
+          scales: {
+              x: {
+                  stacked: true,
+              },
+              y: {
+                  stacked: true
+              }
+          }
+      }
+  });
+  </script>
+  
+
+  
+
+
+
+  <script>
+    var ctx = document.getElementById('ratingsChart').getContext('2d');
+    var ratingsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ categories | tojson }},
+            datasets: [{
+                label: 'Skill Ratings',
+                data: [], // Data to be filled by the AJAX response
+                backgroundColor: 'rgba(255, 99, 132, 0.2)'
+            }]
+        },
+        options: {
+            scales: {
+                x: {  // 'x' is used for the x-axis scale ID in Chart.js 3.x
+                    ticks: {
+                        autoSkip: true,
+                        maxRotation: 90, // Rotate 90 degrees
+                        minRotation: 90  // Rotate 90 degrees
+                    }
+                }
+            }
+        }
+    });
+
+    console.log('jQuery version:', $.fn.jquery);
+    // Your AJAX call code here
+
+    $(document).ready(function() {
+        var baseGetRatingsUrl = "{{ base_get_player_ratings_url }}";
+        $('#playerSelect').change(function() {
+            var playerId = $(this).val();
+            var fullUrl = baseGetRatingsUrl + playerId; // Directly append the player ID to the base URL
+
+            $.ajax({
+                url: fullUrl,
+                type: 'GET',
+                success: function(response) {
+                    console.log(response);
+                    ratingsChart.data.datasets[0].data = Object.values(response);
+                    ratingsChart.update();
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error:", status, error);
+                }
+            });
+        });
+    });
+</script>
+
+
+
+
+
+
+
 
 {% endblock %}

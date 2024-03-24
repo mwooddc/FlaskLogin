@@ -4,3 +4,7 @@ Be able to change the colour scheme - Navy: #353f4c Maroon: #8e1537 White: #ffff
 
 BUGS:
 There is an issue if you add a match, there are errors in one of the matches, you submit the form then when the data comes back you remove a match.
+
+
+REPLYING TO A COMMENT
+I have added a 'view' button to each row and I want to make it so that when you click on the view button it pops up with a dialogue window (you can use shoelaces Dialog component for this) with that rows message in the dialogue window, along with a form for the user to reply in, with a submit button. If the user replies to the message a record is added to the notifications table with where the sender_id is the current logged in user_id and the reciever_id is the user_id of the user who sent the original message that is being replied to. Once the reply message has been sent it needs to mark the original message is_read to 1.
