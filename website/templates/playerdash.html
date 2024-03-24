@@ -1,5 +1,7 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} 
 {% block content%} 
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+<script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -27,7 +29,7 @@
               <tbody>
                   {% for notification in user_notifications %}
                   <tr id="notificationRow_{{ notification.id }}">
-                      <td>{{ notification.timestamp.strftime('%d-%m-%Y') }}</td>
+                      <td>{{ notification.timestamp.strftime('%d/%m/%y') }}</td>
                       <td>{{ notification['sender_name'] }}</td>
                       <td>{{ notification.comment[:10] + '...' if notification.comment|length > 10 else notification.comment }}</td>
                       <td><button type="button" class="btn pink-btn btn-notifications" data-notification-id="{{ notification.id }}" 
@@ -63,8 +65,8 @@
             </thead>
             <tbody>
                 {% for fixture in user_upcoming_fixtures %}
-                <tr>
-                    <td>{{ fixture.date.strftime('%Y-%m-%d') }}</td>
+                <tr data-fixture-id="{{ fixture.id }}">
+                    <td>{{ fixture.date.strftime('%d/%m/%y') }}</td>
                     <td>{{ fixture.opponent_name }}</td>
                     <td>{{ fixture.home_or_away }}</td>
                     <td class="matches-header">{{ fixture.number_of_matches }}</td>
@@ -243,29 +245,42 @@
 
 
 
+
+
+<!-- #### To detect which row has been pressed on the Upcoming Fixtures Table: #####-->
+
+
+
 <script>
-  $(document).ready(function () {
-      $('#UserFixturesTable').DataTable({
-          "order": [[0, "asc"]], // Keeps your initial ordering based on the date column.
-          "columnDefs": [
-              {
-                  "className": "dt-center", // Apply a class to center-align the text
-                  "targets": 3 // Targets the 'No. of Matches' column. Index is based on a zero-based count.
-              }
-          ]
+  $(document).ready(function() {
+      // Initialize DataTables on the fixtures table
+      var table = $('#UserFixturesTable').DataTable({
+          "order": [[0, "asc"]],
+          "paging": false, // Disables pagination
+          "searching": false, // Removes the search bar
+          "info": false, // Will not show 'Showing 1 to N of N entries'
+          "lengthChange": false, // Hides the 'Show entries' dropdown
+          "ordering": false, // Disables sorting for all columns
+          "columnDefs": [{
+              "className": "dt-center",
+              "targets": "_all"  // Applies centering to all columns for consistency
+          }]
+      });
+  
+      // Use event delegation to handle row clicks, ensuring it works even if DataTables modifies the DOM
+      $('#UserFixturesTable').on('click', 'tbody tr', function() {
+
+          var fixtureId = $(this).data('fixture-id');
+          console.log(fixtureId); // 
+          if (fixtureId) { // Proceed only if the fixture ID was found
+              window.location.href = '/player_edit_fixture/' + fixtureId;
+          }
       });
   });
   </script>
-
-
-
-
-
-
-
-
-
-
+  
+<!-- #### To detect which row has been pressed on the Upcoming Fixtures Table: #####-->
+<!-- ################################## FINISHED ######################################## -->
 
 
 
@@ -329,12 +344,32 @@
 <!-- ########################## PLAYER RATINGS GRAPH PREPERATION ################# -->
 
 
+<!-- ################### Displaying DataTable for Notifications ################## -->
+
 
 <script>
-  $(document).ready( function () {
-      $('#notificationsTable').DataTable();
-  } );
-</script>
+  $(document).ready(function() {
+      // Initialize DataTables on the fixtures table
+      var table = $('#notificationsTable').DataTable({
+          "order": [[0, "asc"]],
+          "paging": false, // Disables pagination
+          "searching": false, // Removes the search bar
+          "info": false, // Will not show 'Showing 1 to N of N entries'
+          "lengthChange": false, // Hides the 'Show entries' dropdown
+          "ordering": false, // Disables sorting for all columns
+          "columnDefs": [{
+              "className": "dt-center",
+              "targets": "_all"  // Applies centering to all columns for consistency
+          }]
+      });
+    });
+
+    </script>
+
+
+<!-- ################### Displaying DataTable for Notifications ##################
+################## FINISH ##################### -->
+
 
 
 
@@ -437,6 +472,17 @@
       }
   });
 </script>
+
+
+<!-- #### To detect which row has been pressed on the Upcoming Fixtures Table: #####-->
+<script>
+  $(document).ready(function() {
+      $('#UserfixturesTable tbody tr').on('click', function() {
+          var fixtureId = $(this).data('fixture-id');
+          window.location.href = '/player_edit_fixture/' + fixtureId; // Change '/edit_fixture/' to your desired route
+      });
+  });
+  </script>
   
 
 

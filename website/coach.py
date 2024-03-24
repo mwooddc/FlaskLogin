@@ -7,6 +7,7 @@ from datetime import datetime
 from flask import jsonify
 import re
 from sqlalchemy import func, case, or_, desc
+from sqlalchemy.exc import SQLAlchemyError
 
 
 #A Blueprint simply allows you to create seperate files from the standard app.py
@@ -96,6 +97,7 @@ def reply_to_notifications():
 # Assuming `db` is your SQLAlchemy instance and session
 def get_upcoming_fixtures():
     fixtures_query = db.session.query(
+        TennisEvent.id,
         TennisEvent.date.label('date'),
         TennisEvent.home_venue_id,
         TennisEvent.away_venue_id,
@@ -113,6 +115,7 @@ def get_upcoming_fixtures():
 
     return [
         {
+            'id': fixture.id,
             'date': fixture.date,
             'number_of_matches': fixture.number_of_matches,
             'home_or_away': fixture.home_or_away,
@@ -170,7 +173,7 @@ def get_recent_results():
         losses = sum(1 for match in event.matches if match.won_or_lost == 'Lost')
 
         results.append({
-            'date': event.date.strftime('%Y-%m-%d'),
+            'date': event.date.strftime('%d/%m/%y'),
             'opponent_name': opponent.name if opponent else 'Unknown',
             'home_or_away': home_or_away,
             'wins': wins,
@@ -603,6 +606,50 @@ def create_event_and_matches():
 
 
 
+###### Editing Upcoming Fixtures ################
+@coach.route('/coach_edit_fixture/<int:fixture_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('Coach')
+def edit_fixture(fixture_id):
+    # Fetch the fixture and its related matches
+    fixture = TennisEvent.query.get_or_404(fixture_id)
+    matches = Match.query.filter_by(tennis_event_id=fixture_id).all()
+
+    # Fetch the schools participating in the fixture
+    home_school = School.query.get_or_404(fixture.home_venue_id)
+    away_school = School.query.get_or_404(fixture.away_venue_id)
+
+    if request.method == 'POST':
+        try:
+            # Iterate over each match to update its details
+            for match in matches:
+                player1_id = request.form.get(f'match_{match.id}_player1_id')
+                player2_id = request.form.get(f'match_{match.id}_player2_id')
+                singles_or_doubles = request.form.get(f'match_{match.id}_type')
+                sets_played = request.form.get(f'match_{match.id}_sets_played')
+                sets_won = request.form.get(f'match_{match.id}_sets_won')
+                won_or_lost = request.form.get(f'match_{match.id}_won_lost')
+                comment = request.form.get(f'match_{match.id}_comment')
+
+                # Update match details
+                match.player1_id = int(player1_id) if player1_id else match.player1_id
+                match.player2_id = int(player2_id) if player2_id else match.player2_id
+                match.singles_or_doubles = singles_or_doubles if singles_or_doubles else match.singles_or_doubles
+                match.sets_played = int(sets_played) if sets_played else match.sets_played
+                match.sets_won = int(sets_won) if sets_won else match.sets_won
+                match.won_or_lost = won_or_lost if won_or_lost else match.won_or_lost
+                match.comment = comment if comment else match.comment
+
+            db.session.commit()
+            flash('Fixture updated successfully!', 'success')
+            return redirect(url_for('edit_fixture', fixture_id=fixture_id))
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash('An error occurred while updating the fixture.', 'error')
+            print(e)  # For debugging purposes, consider logging this instead
+
+    # If GET, render the form with current match details
+    return render_template('edit_fixture.html', fixture=fixture, matches=matches, home_school=home_school, away_school=away_school, user=current_user)
 
 
 

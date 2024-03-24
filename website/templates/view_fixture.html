@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+<script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+<body style="background-image: none;" class="light-mode"></body>
+<div id="flash-messages" class="container mt-3"></div>
+
+
+
+
+<form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% for match in matches %}
+    <div class="match-detail">
+        <label for="singles_or_doubles_{{ match.id }}">Singles or Doubles:</label>
+        <input type="text" name="singles_or_doubles_{{ match.id }}" id="singles_or_doubles_{{ match.id }}" value="{{ match.singles_or_doubles }}">
+        
+        <label for="sets_played_{{ match.id }}">Sets Played:</label>
+        <input type="number" name="sets_played_{{ match.id }}" id="sets_played_{{ match.id }}" value="{{ match.sets_played }}">
+
+        <label for="sets_won_{{ match.id }}">Sets Won:</label>
+        <input type="number" name="sets_won_{{ match.id }}" id="sets_won_{{ match.id }}" value="{{ match.sets_won }}">
+
+        <label for="won_or_lost_{{ match.id }}">Won or Lost:</label>
+        <input type="text" name="won_or_lost_{{ match.id }}" id="won_or_lost_{{ match.id }}" value="{{ match.won_or_lost }}">
+        <!-- Add more fields as necessary -->
+    </div>
+    {% endfor %}
+    <button type="submit">Save Changes</button>
+</form>
+
+
+
+
+
+
+
+
+
+
+{% endblock %}

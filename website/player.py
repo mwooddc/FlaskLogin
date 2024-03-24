@@ -150,6 +150,7 @@ def get_user_upcoming_fixtures():
 
     fixtures_query = db.session.query(
         TennisEvent.date.label('date'),
+        TennisEvent.id,
         TennisEvent.home_venue_id,
         TennisEvent.away_venue_id,
         db.func.count(Match.id).label('number_of_matches'),
@@ -168,6 +169,7 @@ def get_user_upcoming_fixtures():
 
     fixtures = [
         {
+            'id': fixture.id,
             'date': fixture.date,
             'number_of_matches': fixture.number_of_matches,
             'home_or_away': fixture.home_or_away,
@@ -335,3 +337,21 @@ def playerdashboard():
 
 
     return render_template('playerdash.html', player_ratings=player_ratings, coach_ratings=coach_ratings, survey_completed=survey_completed, user_upcoming_fixtures=user_upcoming_fixtures, form=form, ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, players_rating_data=players_rating_data, categories=categories, user_notifications=user_notifications, user=current_user)
+
+
+
+
+
+
+###### Editing Upcoming Fixtures ################
+@player.route('/player_edit_fixture/<int:fixture_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('Player')
+def edit_fixture(fixture_id):
+    # Fetch fixture and related match details
+    fixture = TennisEvent.query.get_or_404(fixture_id)
+    matches = Match.query.filter_by(tennis_event_id=fixture_id).all()
+
+    # If POST, process form submission to update match details (not shown here)
+    # If GET, display the editing form with current match details
+    return render_template('view_fixture.html', fixture=fixture, matches=matches, user=current_user)

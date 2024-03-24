@@ -7,6 +7,18 @@ Light Pink: #eba3b1
 Green: #158e6c
 */
 
+
+#fixturesTable tbody tr:hover {
+  cursor: pointer;
+  background-color: #f5f5f5; /* Light grey, adjust color as needed */
+}
+
+#UserFixturesTable tbody tr:hover {
+  cursor: pointer;
+  background-color: #f5f5f5; /* Light grey, adjust color as needed */
+}
+
+
 .bold-text{
   font-weight: 700;
 }

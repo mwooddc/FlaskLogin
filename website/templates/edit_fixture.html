@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+<script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+<body style="background-image: none;" class="light-mode"></body>
+<div id="flash-messages" class="container mt-3"></div>
+
+
+
+
+
+<!-- edit_fixture.html -->
+<form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h2>Editing Fixture: {{ fixture.date.strftime('%Y-%m-%d') }} between {{ home_school.name }} and {{ away_school.name }}</h2>
+
+    {% for match in matches %}
+    <div>
+        <h3>Match {{ loop.index }}</h3>
+        Player 1: <input type="text" name="match_{{ match.id }}_player1" value="{{ match.player1.Forename }} {{ match.player1.Surname }}">
+        Player 2: <input type="text" name="match_{{ match.id }}_player2" value="{{ match.player2.Forename }} {{ match.player2.Surname }}" >
+        Singles/Doubles: <input type="text" name="match_{{ match.id }}_type" value="{{ match.singles_or_doubles }}">
+        Sets Played: <input type="number" name="match_{{ match.id }}_sets_played" value="{{ match.sets_played }}">
+        Sets Won: <input type="number" name="match_{{ match.id }}_sets_won" value="{{ match.sets_won }}">
+        Won/Lost: <select name="match_{{ match.id }}_won_lost">
+            <option value="won" {% if match.won_or_lost == 'won' %}selected{% endif %}>Won</option>
+            <option value="lost" {% if match.won_or_lost == 'lost' %}selected{% endif %}>Lost</option>
+        </select>
+        Comment: <input type="text" name="match_{{ match.id }}_comment" value="{{ match.comment }}">
+    </div>
+    {% endfor %}
+    <button type="submit">Save Changes</button>
+</form>
+
+
+
+
+
+
+
+{% endblock %}
