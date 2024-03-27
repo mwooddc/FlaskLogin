@@ -12,13 +12,6 @@ function addMatch() {
                 <option value="{{ user_id }}">{{ user_name }}</option>
                 {% endfor %}
             </select>
-
-
-
-
-
-
-            
             <!-- Dropdown list for Player 2 -->
             <label for="player2_name_${matchCounter}">Player 2:</label>
             <select id="player2_name_${matchCounter}" name="player2_name_${matchCounter}">

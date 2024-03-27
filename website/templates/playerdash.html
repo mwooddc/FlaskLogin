@@ -50,9 +50,7 @@
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <!-- <h5 class="card-title">Player ratings for: {{ current_user.Forename }}</h5> -->
           <h5 class="card-title">Upcoming Fixtures</h5>
-
           <!-- {{user_upcoming_fixtures}} -->
           <table id="UserFixturesTable" class="table table-striped" style="width:100%">
             <thead>
@@ -93,7 +91,6 @@
               </tr>
               {% for rating, date, category in filtered_data %}
                   <tr>
-                      <!-- need to figure out here how to present the LATEST/MOST RECENT scores per category -->
                       <td>{{ category }}</td>
                       <td>{{ rating }}</td>
                   </tr>
@@ -114,7 +111,7 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Recent Results</h5>
-
+          <!-- need to figure out here how to present the LATEST/MOST RECENT scores per category -->
         </div>
       </div>
     </div>
@@ -125,9 +122,7 @@
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <!-- <h5 class="card-title">Player ratings for: {{ current_user.Forename }}</h5> -->
           <h5 class="card-title">Coach Ratings Over Time</h5>
-
           <!-- Check these for testing purposes<br/><br/>
           {{user_notifications}}<br/><br/>
           {{datasets}}<br/><br/>
@@ -135,7 +130,6 @@
           {{categories}}<br/><br/>
           {{ratings_query}} -->
           
-
           <div id="chart-container">
             <canvas id="userRatingsChart" ></canvas>
           </div>
@@ -162,14 +156,12 @@
 
   </div>
 
-
-
-
 </div>
 
 
 
-<!-- Notifications MODAL -->
+<!-- ### #CREATE THE MODAL THAT WILL APPEAR WHEN VIEWING NOTIFICATION #### -->
+<!-- MODAL -->
 <sl-dialog id="replyModal" label="Notification Details">
   <span class="bold-text">Date|Time: </span><span id="notificationDate"></span></br>
   <span class="bold-text">Sender: </span><span id="notificationSender"></span></br>
@@ -182,12 +174,12 @@
     <button type="submit" class="btn pink-btn btn-notifications">Send Reply</button>
   </form>
 </sl-dialog>
+<!-- ### #CREATE THE MODAL THAT WILL APPEAR WHEN VIEWING NOTIFICATION #### -->
+<!-- ############################ FINISHED ############################### -->
 
 
 
-
-
-
+<!-- ##### #CREATE THE MODAL THAT WILL APPEAR WHEN VIEWING THE SURVEY #### -->
 <!-- Survey MODAL -->
 {% if form %}
   {% if not survey_completed %}
@@ -235,22 +227,18 @@
       </div>
   </form>
   
-
-
   </sl-dialog>
   <!-- Survey Modal End -->
   {% endif %}
 {% endif %}
 
+<!-- ##### #CREATE THE MODAL THAT WILL APPEAR WHEN VIEWING THE SURVEY #### -->
+<!-- ############################ FINISHED ############################### -->
 
 
 
-
-
-<!-- #### To detect which row has been pressed on the Upcoming Fixtures Table: #####-->
-
-
-
+<!-- ##################################################################### -->
+<!-- To detect which row has been pressed on the Upcoming Fixtures Table:  -->
 <script>
   $(document).ready(function() {
       // Initialize DataTables on the fixtures table
@@ -267,9 +255,7 @@
           }]
       });
   
-      // Use event delegation to handle row clicks, ensuring it works even if DataTables modifies the DOM
       $('#UserFixturesTable').on('click', 'tbody tr', function() {
-
           var fixtureId = $(this).data('fixture-id');
           console.log(fixtureId); // 
           if (fixtureId) { // Proceed only if the fixture ID was found
@@ -279,22 +265,15 @@
   });
   </script>
   
-<!-- #### To detect which row has been pressed on the Upcoming Fixtures Table: #####-->
-<!-- ################################## FINISHED ######################################## -->
+<!-- To detect which row has been pressed on the Upcoming Fixtures Table:  -->
+<!-- ############################# FINISHED ############################## -->
 
 
 
-
-
-
-<!-- ########################## PLAYER RATINGS GRAPH PREPERATION ################# -->
-
+<!-- ################## PLAYER RATINGS GRAPH PREPERATION ################# -->
 
 <script>
-  // Python data structure (players_rating_data) passed from the server
-  // const players_rating_data = {{players_rating_data}}
   const players_rating_data = {{ players_rating_data | tojson | safe }};
-  // Extracting data from players_rating_data
   const labels = players_rating_data[0].Date;
   const datasets = players_rating_data.map(entry => {
     const randomColor = '#' + (Math.random().toString(16) + '000000').substring(2, 8); // Generate random color
@@ -320,7 +299,7 @@
           maintainAspectRatio: false,
           aspectRatio: 0.9, // Set a custom aspect ratio (e.g., 2:1)
           scales: {
-              x: {  // Specify x-axis scale options
+              x: {
                   ticks: {
                       autoSkip: true,
                       maxRotation: 90, // Rotate 90 degrees
@@ -339,14 +318,12 @@
   });
 </script>
 
+<!-- ################## PLAYER RATINGS GRAPH PREPERATION ################# -->
+<!-- ############################# FINISHED ############################## -->
 
 
-<!-- ########################## PLAYER RATINGS GRAPH PREPERATION ################# -->
 
-
-<!-- ################### Displaying DataTable for Notifications ################## -->
-
-
+<!-- ############# Displaying DataTable for Notifications ################ -->
 <script>
   $(document).ready(function() {
       // Initialize DataTables on the fixtures table
@@ -366,23 +343,18 @@
 
     </script>
 
-
-<!-- ################### Displaying DataTable for Notifications ##################
-################## FINISH ##################### -->
-
+<!-- ############# Displaying DataTable for Notifications ################ -->
+<!-- ########################### FINISH ################################## -->
 
 
-
-<!-- ############################### JavaScript for Notifications Modal ################################ -->
-
-
+<!-- ############# Displaying DataTable for Notifications ################ -->
 <script>
   function openModal(button) {
     const notificationId = button.getAttribute('data-notification-id');
     const senderId = button.getAttribute('data-sender-id');
     const message = button.getAttribute('data-message');
     const date = button.getAttribute('data-date');
-    const name = button.getAttribute('data-name'); // This assumes you're setting data-name attribute in your button
+    const name = button.getAttribute('data-name');
 
     // Set the content in your modal
     document.getElementById('notificationMessage').textContent = message;
@@ -401,7 +373,7 @@
         "X-CSRFToken": csrfToken,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({}) // No need to send data, but the server might expect a JSON body
+      body: JSON.stringify({})
     })
     .then(response => {
       if (response.ok) {
@@ -415,14 +387,15 @@
   }
 </script>
 
+<!-- ############# Displaying DataTable for Notifications ################ -->
+<!-- ########################### FINISH ################################## -->
 
-<!-- ####################### JavaScript for Notifications Modal FINISH ######################################### -->
 
 
-
+<!-- # GRAPH FOR PROGRESS MADE PLOTTING PLAYER RAITNGS AGAINST COACHES LATESTS # -->
 
 <script>
-  // Retrieve player and coach ratings from Flask template context
+  // Retrieve player and coach ratings
   var playerRatings = {{ player_ratings | tojson }};
   var coachRatings = {{ coach_ratings | tojson }};
 
@@ -457,7 +430,7 @@
       },
       options: {
         scales: {
-            x: {  // 'x' is used for the x-axis scale ID in Chart.js 3.x
+            x: {
                 ticks: {
                     autoSkip: true,
                     maxRotation: 90, // Rotate 90 degrees
@@ -473,17 +446,7 @@
   });
 </script>
 
-
-<!-- #### To detect which row has been pressed on the Upcoming Fixtures Table: #####-->
-<script>
-  $(document).ready(function() {
-      $('#UserfixturesTable tbody tr').on('click', function() {
-          var fixtureId = $(this).data('fixture-id');
-          window.location.href = '/player_edit_fixture/' + fixtureId; // Change '/edit_fixture/' to your desired route
-      });
-  });
-  </script>
-  
-
+<!-- # GRAPH FOR PROGRESS MADE PLOTTING PLAYER RAITNGS AGAINST COACHES LATESTS # -->
+<!-- ########################### FINISH ################################## -->
 
 {% endblock %}

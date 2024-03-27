@@ -2,7 +2,7 @@
 #e.g. if I have a route called @qpp.route def xxx(): and I want to go to that route
 #type  url_for('xxx') REMEMBER if using Blueprints nameoffile.function e.g. 
 #url_for('views.xxx') You can use in templates too with jinja e.g. {{ url_for('views.xxx)}}
-from flask import Blueprint, render_template, redirect, url_for, request, flash, session
+from flask import Blueprint, render_template, redirect, url_for, request, flash
 from . import db
 from .models import User
 #wraps is required but the reasons why are complex (search if required)
@@ -17,15 +17,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 #see this video for explanation: https://www.youtube.com/watch?v=pjVhrIJFUEs
 #To use a Blueprint you have to import Blueprint from flask (see above)
 #You then assign that blueprint to a variable and then use that 
-#as the @route in this code (see line 15)
+#as the @route in this code
 auth = Blueprint("auth", __name__)
 
+
+
+############# HANDLING LOGIN #########################################
+
+# Route: Login
 @auth.route("/login", methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    # if request.method == 'POST':
-    #     Email = request.form.get("Email")
-    #     Password = request.form.get("Password")
 
     if form.validate_on_submit():
         user = User.query.filter_by(Email=form.Email.data).first()
@@ -37,25 +39,14 @@ def login():
             flash('Invalid email or password.', category='error')
     return render_template('login.html', form=form, user = current_user)
 
-    #     user = User.query.filter_by(Email=Email).first()
-    #     if user:
-    #         if check_password_hash(user.Password, Password):
-    #             flash("Logged in!", category='success')
-    #             # Logs in the User whos Email and hashed Password match
-    #             #(see variable above User =   on line 26)
-    #             login_user(user, remember=True)
-    #             # Store the user's role in the session
-    #             session['role'] = user.Role
-    #             #redirect to views.home where the User is passed as an object
-    #             return redirect(url_for('views.home'))
-    #         else:
-    #             flash('Password is incorrect.', category='error')
-    #     else:
-    #         flash('Email does not exist.', category='error')
-
-    # return render_template("login.html", user = current_user)
+############# HANDLING LOGIN #########################################
+############# FINISHED #######################################################
 
 
+
+############# HANDLING SIGN UP #########################################
+
+# Route: Sign Up
 @auth.route("/sign-up", methods=['GET', 'POST'])
 def sign_up():
     form = SignUpForm()
@@ -104,7 +95,14 @@ def sign_up():
                            email=Email, username=Username, 
                            forename=Forename, surname=Surname, role=Role)
 
+############# HANDLING SIGN UP #########################################
+############# FINISHED #######################################################
 
+
+
+############# HANDLING LOGOUT #########################################
+
+# Route: Logout
 @auth.route("/logout")
 @login_required
 def logout():
@@ -125,3 +123,6 @@ def role_required(role):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+############# HANDLING LOGOUT #########################################
+############# FINISHED #######################################################

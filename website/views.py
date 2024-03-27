@@ -1,11 +1,9 @@
-from flask import Blueprint, render_template, session, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from .models import db, User, UserRatings, RatingCategory, School, Notification
-from sqlalchemy import func
-from .forms import LoginForm
 from faker import Faker
 from flask import jsonify, request
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 import random
 from datetime import datetime, timedelta
 
@@ -16,7 +14,6 @@ from datetime import datetime, timedelta
 #You then assign that blueprint to a variable and then use that 
 #as the @route in this code (see lines 13 and 14)
 views = Blueprint("views", __name__)
-
 
 @views.route("/")
 @views.route("/home")
@@ -36,8 +33,6 @@ def home():
     elif current_user.is_authenticated and current_user.Role == 'Coach':
         return redirect(url_for("coach.coachdashboard", user=current_user))
 
-
-
 @views.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
@@ -49,23 +44,14 @@ def settings():
 def profile():
     return render_template('profile.html', user=current_user)
 
+##############################################################################
+################ ROUTES TO POPULATE THE DATABASE WITH DATA ###################
+##############################################################################
 
-
-def count_unread_notifications(user_id):
-    count = Notification.query.filter_by(receiver_id=user_id, is_read=False).count()
-    return count
-
-
-
-#######################################################
-###### ROUTES TO POPULATE THE DATABASE WITH DATA ######
-#######################################################
-
-
-
+# Route: Populate Categories
 @views.route("/")
 @views.route("/populate_categories")
-# Predefined category descriptions
+
 def populate_categories():
     category_descriptions = [
         "Forehand", "Backhand", "Serve", "Net-Play", "Lob", "Volley", "Spin",
@@ -82,11 +68,9 @@ def populate_categories():
     return redirect(url_for('views.home'))  # Redirect to another route (e.g., index)
 
 
-
-
+# Route: Populate Schools
 @views.route("/")
 @views.route("/populate_schools")
-# Predefined category descriptions
 def populate_schools():
     schools = [
         "Charter House", "Epsom", "Sevenoaks", "Harrow", "Tonbridge", "Eton", "Wellington","Cranleigh"
@@ -101,13 +85,9 @@ def populate_schools():
     return redirect(url_for('views.home'))  # Redirect to another route (e.g., index)
 
 
-
-
-
-
+# Route: Populate Ratings
 @views.route("/")
 @views.route("/populate_player_ratings")
-# Predefined category descriptions
 def populate_player_ratings():
     CoachID = 1
     player_ratings =[
@@ -139,11 +119,10 @@ def populate_player_ratings():
     db.session.commit()
 
     flash('Database populated successfully with new player ratings!', 'success')
-    return redirect(url_for('views.home'))  # Redirect to another route (e.g., index)
+    return redirect(url_for('views.home'))
 
 
-
-
+# Route: Populate Users
 @views.route("/")
 @views.route("/populate_users")
 # Predefined category descriptions
@@ -157,9 +136,9 @@ def populate_users():
     created_date = start_date + timedelta(days=random_days)
     passwords = []
 
-    ####################################################################################
-    ########################## Generate bulk users - change range ######################
-    ####################################################################################
+##############################################################################
+###################### Generate bulk users - change range ####################
+##############################################################################
 
     # for _ in range(5):
     #     email = fake.email()
@@ -180,11 +159,11 @@ def populate_users():
     #     # Print out the generated user information including the password
     #     passwords.append(f"Username: {username}, Password: {password}")
 
-    ####################################################################################
+##############################################################################
 
-    ####################################################################################
-    ########################## FOR 2 USERS - add to list if needed #######################
-    ####################################################################################
+##############################################################################
+####################### FOR 4 USERS - add to list if needed ##################
+##############################################################################
 
     set_users =[
         ["coach@coach.com","coach","coach123","coach","coach","Coach"],
@@ -207,41 +186,31 @@ def populate_users():
                     date_created=date_created)
         db.session.add(user)
         
-        
-        # Print out the generated user information including the password
         passwords.append(f"Username: {username}, Password: {password}")
-
-    ####################################################################################
-    
         
     db.session.commit()
     flash('Users populated successfully!', 'success')
     return render_template("passwords.html", passwords=passwords, user=current_user)
 
+##############################################################################
 
 
-
-#### routes required for Notifications Page ####
-#################################################
-
+########## ROUTES REQUIRED TO HANDLE THE ALL NOTIFICATIONS PAGE ##############
+############# FINISHED #######################################################
 
 @views.route('/all_notifications')
 @login_required
 def all_notifications():
-    # user_notifications = Notification.query.filter_by(receiver_id=current_user.id).order_by(Notification.timestamp.desc()).all()
     
     notifications = Notification.query.filter_by(receiver_id=current_user.id).order_by(Notification.timestamp.desc()).all()
-    # # Option 1: Return a list of comments/messages
-    # comments = [notification.comment for notification in notifications]
-    # return comments
 
-    # Option 2: Return a list of dictionaries with more details
+    #Return a list of dictionaries
     detailed_notifications = [{
         'id': notification.id,
         'comment': notification.comment,
         'match_id': notification.match_id,
-        'sender_id': notification.sender_id,  # Include sender_id if you want to show who sent the notification
-        'sender_name': f"{notification.sender.Forename} {notification.sender.Surname}",  # Access sender's name via relationship
+        'sender_id': notification.sender_id,
+        'sender_name': f"{notification.sender.Forename} {notification.sender.Surname}",
         'is_read': notification.is_read,
         'timestamp': notification.timestamp
     } for notification in notifications]
@@ -249,7 +218,7 @@ def all_notifications():
     return render_template('notifications.html', notifications=detailed_notifications, user=current_user)
 
 
-
+# Route: Mark the Notifications as read
 @views.route('/all_mark_notification_as_read/<int:notification_id>', methods=['POST'])
 @login_required
 def all_mark_notification_as_read(notification_id):
@@ -261,11 +230,8 @@ def all_mark_notification_as_read(notification_id):
     return jsonify({'error': 'Notification not found'}), 404
 
 
-
-
-
-
-
+# Route: Reply to a Notification
+# This route can not be the same name as the route in the player.py or coach.py
 @views.route('/all_reply_to_notification', methods=['POST'])
 @login_required
 def all_reply_to_notification():
@@ -297,5 +263,5 @@ def all_reply_to_notification():
 
     return jsonify({'success': 'Reply submitted successfully'}), 200
 
-#### routes required for Notifications Page ####
-################## FINSIHED #########################
+########## ROUTES REQUIRED TO HANDLE THE ALL NOTIFICATIONS PAGE ##############
+############# FINISHED #######################################################

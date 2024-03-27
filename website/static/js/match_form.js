@@ -105,9 +105,6 @@ function addMatch() {
 }
 
 
-
-
-
 function remove_match(formId) {
     const formToRemove = document.getElementById(formId);
     formToRemove.remove();

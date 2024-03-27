@@ -4,23 +4,11 @@ from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager, current_user
 
-
-
-
-
-
-
-
-
 db = SQLAlchemy()
 DB_NAME = "database.db"
 
-
 def create_app():
     app = Flask(__name__)
-
-
-
 
     #A SECRET KEY is required for use of sessions, it is used to encode the session
     # See https://youtu.be/PYILMiGxpAU?t=327 
@@ -58,10 +46,17 @@ def create_app():
             unread_count = 0
         return dict(unread_notifications_count=unread_count)
 
+    ############# CREATING THE DATABASE #####################################
+
     #The line below will call the function on line 54 to create the database
     #Obviously we don't want to do this EVERY time otherwise it will create
     #A blank new databse each time
+    ############## UNCOMMENT THIS NEXT LINE TO CREATE THE DATABASE ##########
+    ############## ONCE CREATED RE-COMMENT THE LINE #########################
     # create_database(app)
+
+    ############# FINISHED ##################################################
+
 
     #Next 6 lines of code are required to use login manager
     #see this video: https://youtu.be/2dEM-s3mRLE
@@ -77,13 +72,18 @@ def create_app():
 
     return app
 
-#see comment above on line 34
+    ############## UNCOMMENT THese next 4 LINES TO CREATE THE DATABASE ##########
+    ############## ONCE CREATED RE-COMMENT THESE LINES #########################
 # def create_database(app):
 #     if not path.exists("website/" + DB_NAME):
 #         db.create_all()
 #         print("Created database!")
 
 
+
+
+
+################# MIGHT DELETE THIS #######################
 # @app.context_processor
 # def inject_unread_notifications_count():
 #     if current_user.is_authenticated:

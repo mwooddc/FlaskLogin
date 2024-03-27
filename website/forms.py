@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask import flash
-from wtforms.validators import InputRequired, DataRequired, NumberRange, ValidationError, Email, EqualTo, Length
+from wtforms.validators import InputRequired, DataRequired, NumberRange, ValidationError, Email, EqualTo
 from wtforms import SelectField, StringField, SubmitField, IntegerField, TextAreaField, PasswordField, RadioField
 from .models import User, RatingCategory
 
@@ -19,10 +19,7 @@ class UserRatingForm(FlaskForm):
         self.rating_category.choices = [(category.CategoryCode, category.CategoryDescription) for category in RatingCategory.query.all()]
 
 class RatingCategoryForm(FlaskForm):
-    category_description = StringField('Category Description', validators=[
-        DataRequired()])
-    #     Length(min=3, message='The field must contain at least 3 characters.')
-    # ])
+    category_description = StringField('Category Description', validators=[DataRequired()])
     submit = SubmitField('Submit')
     def validate_category_description(form, field):
         if len(field.data) < 3:
@@ -35,20 +32,6 @@ class AddSchoolForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-# class TennisEventForm(FlaskForm):
-#     date = StringField('Date', validators=[InputRequired()])
-#     home_venue = SelectField('Home Venue', coerce=int, validators=[InputRequired()])
-#     away_venue = SelectField('Away Venue', coerce=int, validators=[InputRequired()])
-
-# class MatchForm(FlaskForm):
-#     player1_name = SelectField('Player 1')
-#     player2_name = SelectField('Player 2')
-#     singles_or_doubles = SelectField('Singles or Doubles')
-#     sets_played = IntegerField('Sets Played', validators=[InputRequired()])
-#     sets_won = IntegerField('Sets Won', validators=[InputRequired()])
-#     outcome = SelectField('Outcome')
-#     comment = StringField('Comment')
-
 class TennisEventForm(FlaskForm):
     date = StringField('Date', validators=[InputRequired()])
     home_venue = StringField('Home Venue', validators=[InputRequired()])
@@ -57,7 +40,7 @@ class TennisEventForm(FlaskForm):
 class MatchForm(FlaskForm):
     player1_name_0 = SelectField('Player 1')
     # player2_name = SelectField('Player 2')
-    player2_name_0 = SelectField('Player 2', choices=[('', 'None')])  # Assuming you've populated the rest of the choices elsewhere
+    player2_name_0 = SelectField('Player 2', choices=[('', 'None')])
     singles_or_doubles_0 = SelectField(
         'Singles or Doubles',
         choices=[('Singles', 'Singles'), ('Doubles', 'Doubles')],

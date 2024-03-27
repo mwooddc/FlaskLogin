@@ -7,37 +7,92 @@
 <body style="background-image: none;" class="light-mode"></body>
 <div id="flash-messages" class="container mt-3"></div>
 
-
-
+<style>
+    form .form-control.comments-textarea {
+        min-height: 100px;
+    }
+    .form-look{
+    background-color: #e9ecef;
+    }
+</style>
 
 <form method="post">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h2 class="h5_white_on_grey">Editing Fixture: {{ fixture.date.strftime('%d-%m-%y') }} between {{ home_school.name }} and {{ away_school.name }}</h2>
+
     {% for match in matches %}
-    <div class="match-detail">
-        <label for="singles_or_doubles_{{ match.id }}">Singles or Doubles:</label>
-        <input type="text" name="singles_or_doubles_{{ match.id }}" id="singles_or_doubles_{{ match.id }}" value="{{ match.singles_or_doubles }}">
-        
-        <label for="sets_played_{{ match.id }}">Sets Played:</label>
-        <input type="number" name="sets_played_{{ match.id }}" id="sets_played_{{ match.id }}" value="{{ match.sets_played }}">
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th colspan="4" class="bg-secondary text-white">Match {{ loop.index }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="label-cell">Player 1:</td>
+                <td class="input-cell">
+                    <div class="form-control form-look">
+                        {{ match.player1.Forename }} {{ match.player1.Surname }}
+                        <!-- <input type="hidden" name="match_{{ match.id }}_player1_id" value="{{ match.player1.id }}"> -->
+                    </div>
+                </td>
+                <td class="label-cell">Player 2:</td>
+                <td class="input-cell">
+                    <div class="form-control form-look">
+                        {{ match.player2.Forename }} {{ match.player2.Surname }}
+                        <!-- <input type="hidden" name="match_{{ match.id }}_player2_id" value="{{ match.player2.id }}"> -->
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="label-cell">Singles / Doubles:</td>
 
-        <label for="sets_won_{{ match.id }}">Sets Won:</label>
-        <input type="number" name="sets_won_{{ match.id }}" id="sets_won_{{ match.id }}" value="{{ match.sets_won }}">
+                <td class="input-cell">
+                    <div class="form-control form-look">
+                        {{ match.singles_or_doubles }}
+                        <!-- <input type="hidden" name="match_{{ match.id }}_singles_or_doubles" value="{{ match.singles_or_doubles }}"> -->
+                    </div>
+                </td>
 
-        <label for="won_or_lost_{{ match.id }}">Won or Lost:</label>
-        <input type="text" name="won_or_lost_{{ match.id }}" id="won_or_lost_{{ match.id }}" value="{{ match.won_or_lost }}">
-        <!-- Add more fields as necessary -->
-    </div>
+                <td class="label-cell">Sets Played:</td>
+                <td class="input-cell">
+                    <div class="form-control form-look">
+                        {{ match.sets_played }}
+                        <!-- <input type="hidden" name="match_{{ match.id }}_sets_played" value="{{ match.sets_played }}"> -->
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label-cell">Sets Won:</td>
+                <td class="input-cell">
+                    <div class="form-control form-look">
+                        {{ match.sets_won }}
+                        <!-- <input type="hidden" name="match_{{ match.id }}_sets_won" value="{{ match.sets_won }}"> -->
+                    </div>
+                </td>
+                
+                
+                <td class="label-cell">Won / Lost:</td>
+                <td class="input-cell">
+                    <div class="form-control form-look">
+                        {{ match.won_or_lost }}
+                        <!-- <input type="hidden" name="match_{{ match.id }}_won_or_lost" value="{{ match.won_or_lost }}"> -->
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="label-cell" colspan="1">Comment:</td>
+                <td class="input-cell" colspan="3">
+                    <div class="form-control form-look comments-textarea">
+                        {{ match.comment }}
+                    </div>
+                    <!-- <input type="hidden" name="match_{{ match.id }}_comment" value={{ match.comment }}"> -->
+                </td>
+            </tr>
+        </tbody>
+    </table>
     {% endfor %}
-    <button type="submit">Save Changes</button>
 </form>
-
-
-
-
-
-
-
-
-
 
 {% endblock %}

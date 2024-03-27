@@ -7,15 +7,24 @@ Light Pink: #eba3b1
 Green: #158e6c
 */
 
+.table_bg-white{
+  background-color: #fff;
+}
+
+.match-header {
+  background-color: #353f4c;
+  color: white;
+  text-align: center;
+}
 
 #fixturesTable tbody tr:hover {
   cursor: pointer;
-  background-color: #f5f5f5; /* Light grey, adjust color as needed */
+  background-color: #f5f5f5;
 }
 
 #UserFixturesTable tbody tr:hover {
   cursor: pointer;
-  background-color: #f5f5f5; /* Light grey, adjust color as needed */
+  background-color: #f5f5f5;
 }
 
 
@@ -25,11 +34,11 @@ Green: #158e6c
 
 .dt-center { text-align: center; }
 
-#fixturesTable .matches-header, #fixturesTable td:nth-child(4) { /* Assuming 'No. of Matches' is the 4th column */
+#fixturesTable .matches-header, #fixturesTable td:nth-child(4) {
   text-align: center;
 }
 
-#recentResultsTable .matches-header, #recentResultsTable td:nth-child(3) { /* Assuming 'No. of Matches' is the 4th column */
+#recentResultsTable .matches-header, #recentResultsTable td:nth-child(3) {
   text-align: center;
 }
 
@@ -108,9 +117,9 @@ body.dark-mode {
 
 /* Custom CSS to increase line height and adjust form field appearance */
 .form-control, label {
-  line-height: 1.1; /* Adjust line height as needed */
-  height: auto; /* Ensure height adjusts to content */
-  padding-bottom: 5px; /* Adjust padding to ensure text is not cut off */
+  line-height: 1.1;
+  height: auto;
+  padding-bottom: 5px;
 }
 
 .form-control {

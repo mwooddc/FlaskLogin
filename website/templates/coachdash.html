@@ -5,8 +5,6 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <body style="background-image: none;" class="light-mode">
-
-<!-- Here we use Jinja to get access to the current logged in users object -->
 <div class="container mt-4">
 
   <div class="row">
@@ -16,8 +14,6 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Notifications</h5>
-
-
           <table id="notificationsTable" class="table table-striped" style="width:100%">
             <thead>
                 <tr>
@@ -38,19 +34,16 @@
                 {% endfor %}
             </tbody>
         </table>
-
-
         </div>
       </div>
     </div>
+
 
     <!-- PANEL TWO -->
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Upcoming Fixtures</h5>
-
-
           <!-- {{upcoming_fixtures}} -->
           <table id="fixturesTable" class="table table-striped" style="width:100%">
             <thead>
@@ -72,10 +65,10 @@
                 {% endfor %}
             </tbody>
         </table>
-
         </div>
       </div>
     </div>
+
 
     <!-- PANEL THREE -->
     <div class="col-lg-4 mb-4">
@@ -89,21 +82,17 @@
           <div>
             <canvas id="latest_ratings_chart"></canvas>
           </div>
-          
         </div>
       </div>
     </div>
-
-
   </div> 
+
+
   <!-- ##### END OF ROW 1 ##### -->
 
 
-
-
-
-
   <div class="row">
+
 
     <!-- PANEL FOUR -->
     <div class="col-lg-4 mb-4">
@@ -118,11 +107,10 @@
             <!-- <canvas id="latest_ratings_chart"></canvas> -->
             <canvas id="players_total_ratings"></canvas>
           </div>
-
-
         </div>
       </div>
     </div>
+
 
     <!-- PANEL FIVE -->
     <div class="col-lg-4 mb-4">
@@ -130,7 +118,6 @@
         <div class="card-body">
           <h5 class="card-title">Recent Results</h5>
           <!-- {{recent_results}} -->
-
           <table id="recentResultsTable" class="table table-striped" style="width:100%">
             <thead>
                 <tr>
@@ -144,7 +131,6 @@
             <tbody>
                 {% for result in recent_results %}
                 <tr>
-                  
                     <td>{{ result.date }}</td>
                     <td>{{ result.opponent_name }}</td>
                     <td class="matches-header">{{ result.number_of_matches }}</td>
@@ -154,10 +140,10 @@
                 {% endfor %}
             </tbody>
         </table>
-
         </div>
       </div>
     </div>
+
 
     <!-- PANEL SIX -->
     <div class="col-lg-4 mb-4">
@@ -170,22 +156,15 @@
             {% endfor %}
           </select>
           <canvas id="ratingsChart"></canvas>
-
-          
         </div>
       </div>
     </div>
-
-
   </div>
-
-
-
-
 
 </div>
 
 
+<!-- ### #CREATE THE MODAL THAT WILL APPEAR WHEN VIEWING NOTIFICATION #### -->
 <!-- MODAL -->
 <sl-dialog id="replyModal" label="Notification Details">
   <span class="bold-text">Date|Time: </span><span id="notificationDate"></span></br>
@@ -199,19 +178,13 @@
     <button type="submit" class="btn pink-btn btn-notifications">Send Reply</button>
   </form>
 </sl-dialog>
+<!-- ### #CREATE THE MODAL THAT WILL APPEAR WHEN VIEWING NOTIFICATION #### -->
+<!-- ############################ FINISHED ############################### -->
 
 
 
-
-
-
-
-
-
-<!-- #### To detect which row has been pressed on the Upcoming Fixtures Table: #####-->
-
-
-
+<!-- ##################################################################### -->
+<!-- To detect which row has been pressed on the Upcoming Fixtures Table:  -->
 <script>
   $(document).ready(function() {
       // Initialize DataTables on the fixtures table
@@ -227,32 +200,23 @@
               "targets": "_all"  // Applies centering to all columns for consistency
           }]
       });
-  
-      // Use event delegation to handle row clicks, ensuring it works even if DataTables modifies the DOM
-      $('#fixturesTable').on('click', 'tbody tr', function() {
 
+      $('#fixturesTable').on('click', 'tbody tr', function() {
           var fixtureId = $(this).data('fixture-id');
-          console.log(fixtureId); // 
+          console.log(fixtureId);
           if (fixtureId) { // Proceed only if the fixture ID was found
               window.location.href = '/coach_edit_fixture/' + fixtureId;
           }
       });
   });
   </script>
-  
-<!-- #### To detect which row has been pressed on the Upcoming Fixtures Table: #####-->
-<!-- ################################## FINISHED ######################################## -->
+
+<!--  To detect which row has been pressed on the Upcoming Fixtures Table: -->
+<!-- ############################ FINISHED ############################### -->
 
 
 
-
-
-<!-- ###################### Notifications Scripts ############################# -->
-
-
-<!-- ################### Displaying DataTable for Notifications ################## -->
-
-
+<!-- ############# Displaying DataTable for Notifications ################ -->
 <script>
   $(document).ready(function() {
       // Initialize DataTables on the fixtures table
@@ -269,24 +233,23 @@
           }]
       });
     });
-
     </script>
 
-
-<!-- ################### Displaying DataTable for Notifications ##################
-################## FINISH ##################### -->
-
+<!-- ############# Displaying DataTable for Notifications ################ -->
+<!-- ########################### FINISH ################################## -->
 
 
+
+<!-- ############# Displaying DataTable for Notifications ################ -->
 <script>
   function openModal(button) {
     const notificationId = button.getAttribute('data-notification-id');
     const senderId = button.getAttribute('data-sender-id');
     const message = button.getAttribute('data-message');
     const date = button.getAttribute('data-date');
-    const name = button.getAttribute('data-name'); // This assumes you're setting data-name attribute in your button
+    const name = button.getAttribute('data-name');
 
-    // Set the content in your modal
+    // Set the content in the modal
     document.getElementById('notificationMessage').textContent = message;
     document.getElementById('notificationDate').textContent = date;
     document.getElementById('notificationSender').textContent = name;
@@ -303,7 +266,7 @@
         "X-CSRFToken": csrfToken,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({}) // No need to send data, but the server might expect a JSON body
+      body: JSON.stringify({})
     })
     .then(response => {
       if (response.ok) {
@@ -317,13 +280,12 @@
   }
 </script>
 
-
-<!-- ###################### Notifications Scripts #############################
-###################### END ############################# -->
-
+<!-- ############# Displaying DataTable for Notifications ################ -->
+<!-- ########################### FINISH ################################## -->
 
 
-<!-- ###### RECENT RESULTS TABLE Scripts ############## -->
+
+<!-- ##################### RECENT RESULTS SCRIPT ######################### -->
 
 <script>
   $(document).ready(function() {
@@ -342,15 +304,12 @@
   });
   </script>
 
-<!-- ###### RECENT RESULTS TABLE Scripts ##############
-############### FINISH ################## -->
+<!-- ##################### RECENT RESULTS SCRIPT ######################### -->
+<!-- ########################### FINISH ################################## -->
 
 
 
-
-
-
-
+<!-- ###################################### MIGHT REMOVE THIS GRAPH AS THE OTHER IT BETTER ############## -->
 
 <script>
 var ctx = document.getElementById('latest_ratings_chart').getContext('2d');
@@ -385,11 +344,12 @@ var totalRatingsChart = new Chart(ctx, {
 });
 </script>
 
+<!-- ####################################################### FINISH ################################## -->
 
 
+<!-- ############## PLAYER COMBINED CATEGORY SCORES GRAPH ################ -->
 
 <script>
-  // Assuming you have a predefined array of colors
   var colors = [
       'rgba(255, 99, 132, 0.2)',
       'rgba(54, 162, 235, 0.2)',
@@ -397,10 +357,9 @@ var totalRatingsChart = new Chart(ctx, {
       'rgba(75, 192, 192, 0.2)',
       'rgba(153, 102, 255, 0.2)',
       'rgba(255, 159, 64, 0.2)',
-      // Add more colors as needed
+      // Add more colors if needed
   ];
   
-  // Using Jinja2 to insert Flask variables into JavaScript
   var playerLabels = {{ player_ratings_labels|tojson }};
   var playerDatasets = {{ player_ratings_datasets|tojson }};
   
@@ -428,12 +387,13 @@ var totalRatingsChart = new Chart(ctx, {
       }
   });
   </script>
+<!-- ############## PLAYER COMBINED CATEGORY SCORES GRAPH ################ -->
+<!-- ########################### FINISH ################################## -->
   
 
+
+<!-- ### LATEST INDIVIDUAL PLAYER RATINGS GRAPH - SELECT PLAYER (AJAX) ### -->
   
-
-
-
   <script>
     var ctx = document.getElementById('ratingsChart').getContext('2d');
     var ratingsChart = new Chart(ctx, {
@@ -448,7 +408,7 @@ var totalRatingsChart = new Chart(ctx, {
         },
         options: {
             scales: {
-                x: {  // 'x' is used for the x-axis scale ID in Chart.js 3.x
+                x: {
                     ticks: {
                         autoSkip: true,
                         maxRotation: 90, // Rotate 90 degrees
@@ -483,12 +443,7 @@ var totalRatingsChart = new Chart(ctx, {
         });
     });
 </script>
-
-
-
-
-  
-
-
+<!-- ### LATEST INDIVIDUAL PLAYER RATINGS GRAPH - SELECT PLAYER (AJAX) ### -->
+<!-- ########################### FINISH ################################## -->
 
 {% endblock %}

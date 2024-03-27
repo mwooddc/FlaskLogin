@@ -7,18 +7,6 @@ from sqlalchemy.sql import func
 from datetime import datetime
 
 
-
-# class User(db.Model, UserMixin):
-#     #The UserMixin library insists that the field in the database for a user is called
-#     #id and not things like UID or user_ID, it has to be called id
-#     id = db.Column(db.Integer, primary_key=True)
-#     email = db.Column(db.String(150), unique=True)
-#     username = db.Column(db.String(150), unique=True)
-#     password = db.Column(db.String(150))
-#     coach_or_player = db.Column(db.String(6)) #Coach or Player
-#     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
-
-
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -30,11 +18,8 @@ class User(db.Model, UserMixin):
     Role = db.Column(db.String(50), nullable=False)  # 'Player' or 'Coach'
     survey_completed = db.Column(db.Boolean, default=False, nullable=False)
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
+
     # Relationships
-    
-    # session_attendance = db.relationship('SessionAttendance', backref='user', lazy='dynamic')
-    # match_attendance = db.relationship('MatchAttendance', backref='user', lazy='dynamic')
-    # team_players = db.relationship('TeamPlayers', backref='user', lazy='dynamic')
     ratings_given = db.relationship('UserRatings', 
                                  foreign_keys='UserRatings.Raterid',
                                  backref='rater', 
@@ -58,6 +43,7 @@ class Match(db.Model, UserMixin):
     won_or_lost = db.Column(db.String(4), nullable=False)
     comment = db.Column(db.Text)
 
+    # Relationships
     player1 = db.relationship('User', foreign_keys=[player1_id], backref='matches_as_player1')
     player2 = db.relationship('User', foreign_keys=[player2_id], backref='matches_as_player2')
 
@@ -83,23 +69,24 @@ class School(db.Model, UserMixin):
     __tablename__ = 'schools'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    # Other school details like address, contact info, etc.
+    # Could add other school details like address, contact info, etc.
 
 class TennisEvent(db.Model, UserMixin):
     __tablename__ = 'tennis_events'
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime(timezone=True), nullable=False)
-    home_venue_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)#### needs to be HOME venue ID and AWAY venue ID
-    away_venue_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)#### needs to be HOME venue ID and AWAY venue ID
-    # Define the relationship with the School model for the home venue
+    home_venue_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    away_venue_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+
+    # Relationships
     home_venue = db.relationship('School', foreign_keys=[home_venue_id], backref='home_events')
-    # Define the relationship with the School model for the away venue
     away_venue = db.relationship('School', foreign_keys=[away_venue_id], backref='away_events')
 
 class RatingCategory(db.Model, UserMixin):
     __tablename__ = 'rating_category'
     CategoryCode = db.Column(db.Integer, primary_key=True)
     CategoryDescription = db.Column(db.String(255), nullable=False)
+    
     # Relationships
     user_ratings = db.relationship('UserRatings', backref='rating_category', lazy='dynamic')
 
@@ -117,6 +104,7 @@ class PracticeSessions(db.Model, UserMixin):
     SessionID = db.Column(db.Integer, primary_key=True)
     SessionTime = db.Column(db.DateTime, default=datetime.utcnow)
     Comments = db.Column(db.String(255))
+    
     # Relationships
     session_attendance = db.relationship('SessionAttendance', backref='practice_session', lazy='dynamic')
 
@@ -128,32 +116,8 @@ class SessionAttendance(db.Model, UserMixin):
     Late = db.Column(db.Boolean)
     Comments = db.Column(db.String(255))
 
-# class Matches(db.Model, UserMixin):
-#     __tablename__ = 'matches'
-#     MatchID = db.Column(db.Integer, primary_key=True)
-#     TeamName = db.Column(db.String(255), db.ForeignKey('teams.TeamName'))
-#     OppositionName = db.Column(db.String(255), db.ForeignKey('opposition.OppositionName'))
-#     FixtureTime = db.Column(db.DateTime, default=datetime.utcnow)
-#     PostMatchFeedback = db.Column(db.String(255))
-#     # Relationships
-#     match_attendance = db.relationship('MatchAttendance', backref='match', lazy='dynamic')
 
-# class MatchAttendance(db.Model, UserMixin):
-#     __tablename__ = 'match_attendance'
-#     MatchID = db.Column(db.Integer, db.ForeignKey('matches.MatchID'), primary_key=True)
-#     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-#     Attended = db.Column(db.Boolean)
-#     Late = db.Column(db.Boolean)
-#     Comments = db.Column(db.String(255))
-
-# class TeamPlayers(db.Model, UserMixin):
-#     __tablename__ = 'team_players'
-#     TeamName = db.Column(db.String(255), db.ForeignKey('teams.TeamName'), primary_key=True)
-#     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-#     Position = db.Column(db.String(255))
-
-
-
+# Function: To identify unread notifications across all pages
 def count_unread_notifications(user_id):
     count = Notification.query.filter_by(receiver_id=user_id, is_read=False).count()
     return count

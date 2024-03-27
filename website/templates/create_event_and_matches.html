@@ -1,5 +1,5 @@
-{% extends "base.html" %} {% block title %}Sign Up{% endblock %} {% block
-    content %}
+{% extends "base.html" %} {% block title %}Sign Up{% endblock %}
+{% block content %}
 
     <script src="{{url_for('static', filename='js/match_form.js') }}"></script>
     <!-- Using a script tag with a non-JavaScript type to hide the players json in
@@ -7,15 +7,9 @@
     <script type="application/json" id="players">
         {{ (players or [])|tojson }}
     </script>
-
-
-    
     
 </head>
 <body style="background-image: none;" class="light-mode">
-
-
-
     
     <form method="POST" action="{{ url_for('coach.create_event_and_matches') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -126,13 +120,11 @@
             </div>
         </div>
     </form>
-    
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             loadPlayersData();
         });
         </script>
-    
 
 {% endblock %}
