@@ -68,64 +68,59 @@
 
     <!-- ######## This script is making the table sort and searchable -->
     <script>
-$(document).ready(function() {
-        $('#notificationsTable').DataTable();
+        $(document).ready(function() {
+            $('#notificationsTable').DataTable();
 
-        $('.view-btn').click(function() {
-        var notificationId = $(this).data('notification-id');
-        console.log(notificationId);
-        var senderid = $(this).data('sender-id');
-        console.log(senderid);
-        var notificationDate = $(this).data('date');
-        console.log(notificationDate);
-        var senderName = $(this).data('name');
-        console.log(senderName);
-        var isRead = $(this).data('is-read');
-        console.log(isRead);
-        var message = $(this).data('message');
-        console.log(message);
-        
-        
-        // Populate the modal with the notification details
-        // #is val hidden and text not?
-        $('#originalNotificationId').val(notificationId);  ///
-        
-        $('#originalSenderId').text(senderid); ////
-        $('#notificationDate').text(notificationDate); //
-        $('#notificationSender').text(senderName); //
-        $('#notificationIsRead').text(isRead); //
-        $('#notificationMessage').text(message); //
-        
-        
+            // Event delegation for dynamically added buttons
+            $(document).on('click', '.view-btn', function() {
+                var notificationId = $(this).data('notification-id');
+                console.log(notificationId);
+                var senderid = $(this).data('sender-id');
+                console.log(senderid);
+                var notificationDate = $(this).data('date');
+                console.log(notificationDate);
+                var senderName = $(this).data('name');
+                console.log(senderName);
+                var isRead = $(this).data('is-read');
+                console.log(isRead);
+                var message = $(this).data('message');
+                console.log(message);
 
-        
-        // Shoelace way to show the dialog
-        document.getElementById('reply_modal').show();
+                // Populate the modal with the notification details
+                $('#originalNotificationId').val(notificationId);
+                $('#originalSenderId').text(senderid);
+                $('#notificationDate').text(notificationDate);
+                $('#notificationSender').text(senderName);
+                $('#notificationIsRead').text(isRead);
+                $('#notificationMessage').text(message);
 
-        // Check if the notification hasn't been marked as read yet
-        if (!isRead) {
-            $.ajax({
-                url: '/all_mark_notification_as_read/' + notificationId, // Specify your endpoint
-                method: 'POST',
-                data: JSON.stringify({'notificationId': notificationId}), // Ensure you are sending the expected data
-                contentType: "application/json; charset=utf-8",
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-CSRFToken', $('meta[name="csrf-token"]').attr('content'));
-                },
-                success: function(response) {
-                    // Update UI to reflect that the notification is now read
-                    // For example, remove the 'font-weight-bold' class from the row
-                    $('button[data-id="' + notificationId + '"]').closest('tr').removeClass('font-weight-bold');
-                    // Update the isRead data attribute
-                    $('button[data-id="' + notificationId + '"]').data('is-read', true);
-                },
-                error: function(error) {
-                    console.error('Error marking notification as read:', error);
+                // Show the dialog
+                document.getElementById('reply_modal').show();
+
+                // Check if the notification hasn't been marked as read yet
+                if (!isRead) {
+                    $.ajax({
+                        url: '/all_mark_notification_as_read/' + notificationId,
+                        method: 'POST',
+                        data: JSON.stringify({'notificationId': notificationId}),
+                        contentType: "application/json; charset=utf-8",
+                        beforeSend: function(xhr) {
+                            xhr.setRequestHeader('X-CSRFToken', $('meta[name="csrf-token"]').attr('content'));
+                        },
+                        success: function(response) {
+                            // Update UI to reflect that the notification is now read
+                            $('button[data-notification-id="' + notificationId + '"]').closest('tr').removeClass('font-weight-bold');
+                            // Update the isRead data attribute
+                            $('button[data-notification-id="' + notificationId + '"]').data('is-read', true);
+                        },
+                        error: function(error) {
+                            console.error('Error marking notification as read:', error);
+                        }
+                    });
                 }
             });
-        }
-    });
-});
+        });
+
 
     </script>
 
