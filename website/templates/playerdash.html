@@ -110,8 +110,10 @@
     <div class="col-lg-4 mb-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Recent Results</h5>
+          <h5 class="card-title">Matches Won vs Matches Lost</h5>
           <!-- need to figure out here how to present the LATEST/MOST RECENT scores per category -->
+          <!-- {{won_or_lost_graph_data}} -->
+          <canvas id="matchesPieChart"></canvas>
         </div>
       </div>
     </div>
@@ -447,6 +449,46 @@
 </script>
 
 <!-- # GRAPH FOR PROGRESS MADE PLOTTING PLAYER RAITNGS AGAINST COACHES LATESTS # -->
+<!-- ########################### FINISH ################################## -->
+
+
+
+<!-- ################## PIE CHART FOR WON OR LOST GRAPH ################## -->
+
+<script>
+  var ctx3 = document.getElementById('matchesPieChart').getContext('2d');
+  var matchesPieChart = new Chart(ctx3, {
+      type: 'pie',
+      data: {
+          labels: {{ won_or_lost_graph_data.labels | tojson }},
+          datasets: [{
+              data: {{ won_or_lost_graph_data.data | tojson }},
+              backgroundColor: [
+                  'rgba(75, 192, 192, 0.2)',  // Won - green
+                  'rgba(255, 99, 132, 0.2)'   // Lost - red
+              ],
+              borderColor: [
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(255, 99, 132, 1)'
+              ],
+              borderWidth: 1
+          }]
+      },
+      options: {
+          responsive: true,
+          legend: {
+              position: 'top',
+          },
+          title: {
+              display: true,
+              text: 'Won vs Lost Matches'
+          }
+      }
+  });
+  </script>
+
+
+<!-- ################## PIE CHART FOR WON OR LOST GRAPH ################## -->
 <!-- ########################### FINISH ################################## -->
 
 {% endblock %}

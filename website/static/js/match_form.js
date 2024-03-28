@@ -68,7 +68,7 @@ function addMatch() {
     // "Sets Won" field with min value of 0 and default value of 0
     row.appendChild(createFormElement('input', `match[${formCount}][sets_won]`, 'col-sm-6 col-lg-2', 'Sets Won', [], 'number', '', '0', '0'));
 
-    row.appendChild(createFormElement('select', `match[${formCount}][won_or_lost]`, 'col-sm-6 col-lg-2', 'Won or Lost', [{ value: 'Won', label: 'Won' }, { value: 'Lost', label: 'Lost' }]));
+    row.appendChild(createFormElement('select', `match[${formCount}][won_or_lost]`, 'col-sm-6 col-lg-2', 'Won or Lost', [{ value: 'TBC', label: 'TBC' }, { value: 'PND', label: 'PND' }, { value: 'Won', label: 'Won' }, { value: 'Lost', label: 'Lost' }]));
 
     newUserForm.appendChild(row);
 

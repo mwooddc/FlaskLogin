@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+<script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+<body style="background-image: none;" class="light-mode"></body>
+<div id="flash-messages" class="container mt-3"></div>
+
+<form method="POST" action="{{ url_for('coach.schedule_training_session') }}">
+    {{ form.csrf_token }}
+    <h1 class="white_on_grey">Schedule Training Session</h1>
+
+    <div class="container">
+        <div class="row form-group lightgrey padding_top_10">
+            <div class="col-12 col-md-4">
+                {{ form.date.label }}
+                {{ form.date(class="form-control") }}
+                {% if form.date.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.date.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-12 col-md-4">
+                {{ form.time.label }}
+                {{ form.time(class="form-control") }}
+                {% if form.time.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.time.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row form-group lightgrey padding_top_10">
+            <div class="col-12 col-md-12">
+                {{ form.comments.label }}
+                {{ form.comments(class="form-control") }}
+                {% if form.comments.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.comments.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div></br>
+    <button type="submit" class="btn green-btn">Schedule Session</button>
+</form>
+
+
+
+{% endblock %}

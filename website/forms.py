@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from flask import flash
 from wtforms.validators import InputRequired, DataRequired, NumberRange, ValidationError, Email, EqualTo
 from wtforms import SelectField, StringField, SubmitField, IntegerField, TextAreaField, PasswordField, RadioField
+
 from .models import User, RatingCategory
 
 class UserRatingForm(FlaskForm):
@@ -91,3 +92,12 @@ def generate_survey_form():
         setattr(DynamicSurveyForm, field_name, IntegerField(f'{category.CategoryDescription}', validators=[DataRequired(), NumberRange(min=0, max=10)]))
 
     return DynamicSurveyForm
+
+
+class ScheduleTrainingSessionForm(FlaskForm):
+    date = StringField('Date', validators=[DataRequired()], render_kw={"type": "date"})
+    time = StringField('Time', validators=[DataRequired()], render_kw={"type": "time"})
+    comments = TextAreaField('Comments', validators=[DataRequired()])
+
+
+

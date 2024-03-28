@@ -40,7 +40,8 @@ class Match(db.Model, UserMixin):
     singles_or_doubles = db.Column(db.String(7), nullable=False)
     sets_played = db.Column(db.Integer, nullable=False)
     sets_won = db.Column(db.Integer, nullable=False)
-    won_or_lost = db.Column(db.String(4), nullable=False)
+    # won_or_lost = db.Column(db.String(4), nullable=False)
+    won_or_lost = db.Column(db.Enum('TBC', 'PND', 'Won', 'Lost'))
     comment = db.Column(db.Text)
 
     # Relationships
@@ -112,9 +113,7 @@ class SessionAttendance(db.Model, UserMixin):
     __tablename__ = 'session_attendance'
     SessionID = db.Column(db.Integer, db.ForeignKey('practice_sessions.SessionID'), primary_key=True)
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    Attended = db.Column(db.Boolean)
-    Late = db.Column(db.Boolean)
-    Comments = db.Column(db.String(255))
+    Attended = db.Column(db.Enum('Present', 'Absent', 'Late'))
 
 
 # Function: To identify unread notifications across all pages

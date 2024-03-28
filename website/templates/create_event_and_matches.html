@@ -87,6 +87,8 @@
                                 <div class="col-12 col-md-4">
                                     Won or Lost:
                                     <select name="match[{{ loop.index0 }}][won_or_lost]" class="form-control" required>
+                                        <option value="TBC" {% if match['won_or_lost'] == 'TBC' %}selected{% endif %}>TBC</option>
+                                        <option value="PND" {% if match['won_or_lost'] == 'PND' %}selected{% endif %}>PND</option>
                                         <option value="Won" {% if match['won_or_lost'] == 'Won' %}selected{% endif %}>Won</option>
                                         <option value="Lost" {% if match['won_or_lost'] == 'Lost' %}selected{% endif %}>Lost</option>
                                     </select>

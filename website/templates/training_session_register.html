@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+<script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+
+<body style="background-image: none;" class="light-mode"></body>
+<div id="flash-messages" class="container mt-3"></div>
+
+<h1>Session Details</h1>
+<p>Date and Time: {{ session.SessionTime }}</p>
+<p>Comments: {{ session.Comments }}</p>
+
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Attendance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in players %}
+            <tr>
+                <td>{{ player.Forename }} {{ player.Surname }}</td>
+                <td>
+                    <select name="{{ 'player_' ~ player.id ~ '_attendance' }}">
+                        <option value="Present" {% if attendance_data.get(player.id) == 'Present' %} selected {% endif %}>Present</option>
+                        <option value="Absent" {% if attendance_data.get(player.id) == 'Absent' %} selected {% endif %}>Absent</option>
+                        <option value="Late" {% if attendance_data.get(player.id) == 'Late' %} selected {% endif %}>Late</option>
+                    </select>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if attendance_data %}
+        <button type="submit">Update</button>
+    {% else %}
+        <button type="submit">Save</button>
+    {% endif %}
+</form>
+
+{% endblock %}

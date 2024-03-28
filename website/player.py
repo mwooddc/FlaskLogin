@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from .models import User
 from .auth import role_required
 from collections import defaultdict
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from datetime import datetime
 from .forms import generate_survey_form
 from sqlalchemy.exc import SQLAlchemyError
@@ -216,6 +216,37 @@ def player_and_coach_ratings():
 ############# FINISHED #######################################################
 
 
+##################  GET DATA FOR WON AND LOST PIE CHART  #####################
+
+def won_or_lost_graph_function():
+    player_id = current_user.id
+
+    won_matches = Match.query.filter(
+        or_(
+            and_(Match.player1_id == player_id, Match.won_or_lost == 'Won'),
+            and_(Match.player2_id == player_id, Match.won_or_lost == 'Won')
+        )
+    ).count()
+
+    lost_matches = Match.query.filter(
+        or_(
+            and_(Match.player1_id == player_id, Match.won_or_lost == 'Lost'),
+            and_(Match.player2_id == player_id, Match.won_or_lost == 'Lost')
+        )
+    ).count()
+
+    # Preparing data for the pie chart
+    won_or_lost_graph_data = {
+        'labels': ['Won', 'Lost'],
+        'data': [won_matches, lost_matches],
+    }
+
+    return won_or_lost_graph_data
+
+##################  GET DATA FOR WON AND LOST PIE CHART  #####################
+############# FINISHED #######################################################
+
+
 
 #######################  ROUTE FOR THE PLAYER DASHBOARD  #####################
 
@@ -298,7 +329,10 @@ def playerdashboard():
 
     player_ratings, coach_ratings = player_and_coach_ratings()
 
-    return render_template('playerdash.html', player_ratings=player_ratings, coach_ratings=coach_ratings, survey_completed=survey_completed, user_upcoming_fixtures=user_upcoming_fixtures, form=form, ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, players_rating_data=players_rating_data, categories=categories, user_notifications=user_notifications, user=current_user)
+    won_or_lost_graph_data = won_or_lost_graph_function()
+    print(won_or_lost_graph_data)
+
+    return render_template('playerdash.html', player_ratings=player_ratings, won_or_lost_graph_data=won_or_lost_graph_data, coach_ratings=coach_ratings, survey_completed=survey_completed, user_upcoming_fixtures=user_upcoming_fixtures, form=form, ratings_query=ratings_query, filtered_data=filtered_data, datasets=datasets, players_rating_data=players_rating_data, categories=categories, user_notifications=user_notifications, user=current_user)
 
 #######################  ROUTE FOR THE PLAYER DASHBOARD  #####################
 ############# FINISHED #######################################################
@@ -351,5 +385,3 @@ def edit_fixture(fixture_id):
 
 ######################  VIEWING UPCOMING FIXTURES  ###########################
 ############# FINISHED #######################################################
-
-

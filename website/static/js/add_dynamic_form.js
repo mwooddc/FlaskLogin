@@ -41,7 +41,9 @@ function addMatch() {
 
             <label for="won_or_lost_${matchCounter}">Won or Lost:</label>
             <select id="won_or_lost_${matchCounter}" name="won_or_lost_${matchCounter}" required>
-                <option value="Won">won</option>
+                <option value="TBC">TBC</option>
+                <option value="PND">PND</option>
+                <option value="Won">Won</option>
                 <option value="Lost">Lost</option>
             </select><br><br>
 

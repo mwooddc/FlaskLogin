@@ -1,4 +1,4 @@
-$(function(){
+$(document).ready(function() {
 	$("#wizard").steps({
         headerTag: "h4",
         bodyTag: "section",

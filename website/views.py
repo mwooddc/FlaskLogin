@@ -73,7 +73,7 @@ def populate_categories():
 @views.route("/populate_schools")
 def populate_schools():
     schools = [
-        "Charter House", "Epsom", "Sevenoaks", "Harrow", "Tonbridge", "Eton", "Wellington","Cranleigh"
+        "Charterhouse", "Epsom", "Sevenoaks", "Harrow", "Tonbridge", "Eton", "Wellington","Cranleigh"
     ]
 
     for code, school in enumerate(schools, start=1):
@@ -166,10 +166,10 @@ def populate_users():
 ##############################################################################
 
     set_users =[
-        ["coach@coach.com","coach","coach123","coach","coach","Coach"],
-        ["player@player.com","player","player123","player","player","Player"],
-        ["player2@player2.com","player2","player2123","player2","player2","Player"],
-        ["sam@sam.com","sam","sam123","sam","smith","Player"]
+        ["coach@coach.com","coach","coach123","coach","coach","Coach",0],
+        ["player@player.com","player","player123","player","player","Player",0],
+        ["player2@player2.com","player2","player2123","player2","player2","Player",0],
+        ["sam@sam.com","sam","sam123","sam","smith","Player",0]
     ]
     for i in range(len(set_users)):
         email = set_users[i][0]
@@ -179,18 +179,19 @@ def populate_users():
         forename = set_users[i][3]
         surname = set_users[i][4]
         role = set_users[i][5]
+        survey_completed = set_users[i][6]
         date_created = created_date
         
         user = User(Email=email, Username=username, Password=hashed_password,
                     Forename=forename, Surname=surname, Role=role,
-                    date_created=date_created)
+                    survey_completed=survey_completed, date_created=date_created)
         db.session.add(user)
         
         passwords.append(f"Username: {username}, Password: {password}")
         
     db.session.commit()
     flash('Users populated successfully!', 'success')
-    return render_template("passwords.html", passwords=passwords, user=current_user)
+    return render_template("login.html", passwords=passwords, user=current_user)
 
 ##############################################################################
 

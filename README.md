@@ -44,6 +44,10 @@ If there is no Flask-WTF Form created for the form then you put this in the form
 </form> -->
 
 
+# Where to get icons:
+https://fontawesome.com/search
+Then make sure taht you select the version I am using: 5.15.4
+
 # How to Merge Branches on Git
 Open a Pull Request (PR):
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, session, flash, redirect, url_for, request
 from flask_login import login_required, current_user
-from .forms import UserRatingForm, RatingCategoryForm, AddSchoolForm
-from .models import db, User, UserRatings, RatingCategory, School, TennisEvent, Match, Notification
+from .forms import UserRatingForm, RatingCategoryForm, AddSchoolForm, ScheduleTrainingSessionForm
+from .models import db, User, UserRatings, RatingCategory, School, TennisEvent, Match, Notification, PracticeSessions, SessionAttendance
 from .auth import role_required
 from datetime import datetime
 from flask import jsonify
@@ -648,4 +648,83 @@ def edit_fixture(fixture_id):
                             user=current_user)
 
 ######################  EDITING UPCOMING FIXTURES  ###########################
+############# FINISHED #######################################################
+
+
+######################  SCHEDULING TRAINING SESSIONS #########################
+
+# Route: for scheduling a training session
+@coach.route('/schedule_training_session', methods=['GET', 'POST'])
+@login_required
+@role_required('Coach')
+def schedule_training_session():
+    form = ScheduleTrainingSessionForm()
+    if form.validate_on_submit():
+        # Extract data from the form
+        date = form.date.data
+        time = form.time.data
+        comments = form.comments.data
+
+        # Combine date and time into a single datetime object
+        session_time = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M')
+
+        # Create a new PracticeSessions instance
+        new_session = PracticeSessions(SessionTime=session_time, Comments=comments)
+
+        # Add the new session to the database
+        db.session.add(new_session)
+        db.session.commit()
+
+        flash('Training session scheduled successfully!', 'success')
+        return redirect(url_for('coach.training_session_register', session_id=new_session.SessionID))
+
+    return render_template('schedule_training_session.html', form=form, user=current_user)
+
+######################  SCHEDULING TRAINING SESSIONS #########################
+############# FINISHED #######################################################
+
+
+
+
+##################  VIEW A TRAINING SESSION and REGISTER #####################
+
+# Route for viewing session details and recording attendance
+@coach.route('/session/<int:session_id>', methods=['GET', 'POST'])
+@coach.route('/session/<int:session_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('Coach')
+def training_session_register(session_id):
+    session = PracticeSessions.query.get(session_id)
+    players = User.query.filter_by(Role='Player').all()
+    existing_attendance = SessionAttendance.query.filter_by(SessionID=session_id).all()
+
+    if request.method == 'POST':
+        for player in players:
+            attendance = request.form.get(f'player_{player.id}_attendance')
+            # Update existing attendance records or create new ones
+            session_attendance = SessionAttendance.query.filter_by(SessionID=session_id, id=player.id).first()
+            if session_attendance:
+                session_attendance.Attended = attendance
+            else:
+                session_attendance = SessionAttendance(SessionID=session_id, id=player.id, Attended=attendance)
+                db.session.add(session_attendance)
+        db.session.commit()
+        
+        if existing_attendance:
+            flash('Attendance has been updated successfully!', 'success')
+        else:
+            flash('Attendance has been saved successfully!', 'success')
+        
+        return redirect(url_for('coach.training_session_register', session_id=session_id))
+    
+    # Prepopulate form fields with existing attendance data
+    attendance_data = {}
+    for player in players:
+        attendance = next((a.Attended for a in existing_attendance if a.id == player.id), None)
+        if attendance:
+            attendance_data[player.id] = attendance
+    
+    return render_template('training_session_register.html', session=session, players=players, attendance_data=attendance_data, user=current_user)
+
+##################  VIEW A TRAINING SESSION and REGISTER #####################
 ############# FINISHED #######################################################
