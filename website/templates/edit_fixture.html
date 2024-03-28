@@ -65,8 +65,8 @@
                 <td class="label-cell">Won/Lost:</td>
                 <td class="input-cell">
                     <select name="match_{{ match.id }}_won_lost" class="form-control">
-                        <option value="won" {% if match.won_or_lost == 'won' %}selected{% endif %}>Won</option>
-                        <option value="lost" {% if match.won_or_lost == 'lost' %}selected{% endif %}>Lost</option>
+                        <option value="Won" {% if match.won_or_lost == 'Won' %}selected{% endif %}>Won</option>
+                        <option value="Lost" {% if match.won_or_lost == 'Lost' %}selected{% endif %}>Lost</option>
                     </select>
                 </td>
             </tr>

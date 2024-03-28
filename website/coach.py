@@ -616,7 +616,11 @@ def edit_fixture(fixture_id):
             for match in matches:
                 player1_id = request.form.get(f'match_{match.id}_player1_id')
                 player2_id = request.form.get(f'match_{match.id}_player2_id')
-                singles_or_doubles = request.form.get(f'match_{match.id}_type')
+
+
+                singles_or_doubles = request.form.get(f'match_{match.id}_singles_or_doubles')
+
+
                 sets_played = request.form.get(f'match_{match.id}_sets_played')
                 sets_won = request.form.get(f'match_{match.id}_sets_won')
                 won_or_lost = request.form.get(f'match_{match.id}_won_lost')
@@ -633,7 +637,7 @@ def edit_fixture(fixture_id):
 
             db.session.commit()
             flash('Fixture updated successfully!', 'success')
-            return redirect(url_for('edit_fixture', fixture_id=fixture_id))
+            return redirect(url_for('coach.edit_fixture', fixture_id=fixture_id))
         except SQLAlchemyError as e:
             db.session.rollback()
             flash('An error occurred while updating the fixture.', 'error')
